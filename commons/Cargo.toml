@@ -6,11 +6,8 @@ description = "common code. TODO: DRY dependency versions"
 
 
 [dependencies]
-tokio = { version = "1.42", features = ["full"] }
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-anyhow = "1.0.94"
+anyhow.workspace = true
 
-chrono = "0.4.39"
-
-uuid = { version = "0.8.2" , features = ["v4"]}
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true

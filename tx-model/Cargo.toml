@@ -6,4 +6,4 @@ edition = "2021"
 [dependencies]
 rust-demo-commons = { path = "../commons" }
 
-uuid = "1.11.0"
+uuid.workspace = true

@@ -4,17 +4,16 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+anyhow.workspace = true
+
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
 rust-demo-commons = {  path = "../commons" }
-
-tokio = { version = "1.42", features = ["full"] }
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-anyhow = "1.0.94"
-
-chrono = "0.4.39"
-
 tx-model = { path = "../tx-model" }
-uuid = { version = "1.11.0", features = ["v4"] }
+
+uuid.workspace = true
 
 axum = "0.7.9"
 
