@@ -1,0 +1,9 @@
+[package]
+name = "tx-model"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rust-demo-commons = { path = "../commons" }
+
+uuid = "1.11.0"

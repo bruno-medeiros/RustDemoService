@@ -3,5 +3,8 @@
 resolver = "2"
 
 members = [
+    "commons",
+    "tx-model",
+    "snippets",
     "demo_svc",
 ]
