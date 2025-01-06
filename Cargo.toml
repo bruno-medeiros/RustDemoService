@@ -4,7 +4,7 @@ resolver = "2"
 
 members = [
     "commons",
-    "tx-model",
+    "domain-tx",
     "snippets",
     "demo_svc",
 ]

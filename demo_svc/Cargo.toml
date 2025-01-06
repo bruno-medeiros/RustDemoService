@@ -11,7 +11,7 @@ tracing.workspace = true
 tracing-subscriber.workspace = true
 
 rust-demo-commons = {  path = "../commons" }
-tx-model = { path = "../tx-model" }
+tx-model = { path = "../domain-tx" }
 
 uuid.workspace = true
 

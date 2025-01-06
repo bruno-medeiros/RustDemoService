@@ -3,8 +3,8 @@ use std::collections::HashMap;
 use tx_model::{Account, AccountId, Balance};
 use uuid::Uuid;
 
-trait AccountsApi {
-    async fn create_account(&mut self, description: String) -> Result<AccountId>;
+pub trait AccountsApi {
+    async fn create_account(&mut self, description: &str) -> Result<AccountId>;
 
     async fn get_balance(&mut self, account: AccountId) -> Result<Balance>;
 
@@ -20,11 +20,11 @@ pub struct InMemoryAccountsService {
 }
 
 impl AccountsApi for InMemoryAccountsService {
-    async fn create_account(&mut self, description: String) -> Result<AccountId> {
+    async fn create_account(&mut self, description: &str) -> Result<AccountId> {
         let id = Uuid::new_v4();
         let account = Account {
             id,
-            description,
+            description: description.to_owned(),
             balance: 0,
             points: 0,
         };
@@ -69,7 +69,7 @@ impl AccountsApi for InMemoryAccountsService {
 pub struct SqlAccountsService {}
 
 impl AccountsApi for SqlAccountsService {
-    async fn create_account(&mut self, description: String) -> Result<AccountId> {
+    async fn create_account(&mut self, description: &str) -> Result<AccountId> {
         todo!()
     }
 
