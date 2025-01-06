@@ -2,7 +2,7 @@
 name = "rust-demo-commons"
 version = "0.1.0"
 edition = "2021"
-description = "common code. TODO: DRY dependency versions"
+description = "common code."
 
 
 [dependencies]

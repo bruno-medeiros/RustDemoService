@@ -1,0 +1,17 @@
+
+
+```
+docker run hello-world
+```
+
+#Postgres:
+
+docker run --name some-postgres -e POSTGRES_PASSWORD=example -p 5432:5432 -d postgres
+
+docker run --name root-postgres -e POSTGRES_PASSWORD=example -p 5432:5432 --replace -d postgres
+
+
+# Trying out without root:
+docker run --name some-postgres -e POSTGRES_PASSWORD=example -p 5432:5432 -v pgdata2:/var/lib/postgresql/data --user $(id -u):$(id -g) postgres
+
+docker run --name some-postgres -e POSTGRES_PASSWORD=example -p 5432:5432 -v pgdata3:/var/lib/postgresql/data --user $(id -u):$(id -g) postgres
