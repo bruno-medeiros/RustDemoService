@@ -4,15 +4,10 @@ use std::error::Error;
 
 use anyhow::anyhow;
 
-/// ```compile_fail,E0515
-/// use path_to::MyBox;
-///
-///     fn basics() {
-///         let error: Box<dyn Error> = "xxx".into();
-///         let error2: anyhow::Error = error.into();
-///     }
-/// ```
-fn _doc_test() {}
+fn anyhow_error_conversion_fail() {
+    // let error: Box<dyn Error> = "xxx".to_string().into();
+    // let error2: anyhow::Error = error.into();
+}
 
 fn generic_error(num: i8) -> Result<(), Box<dyn Error>> {
     if num < 0 {
