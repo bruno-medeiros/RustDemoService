@@ -3,6 +3,9 @@ name = "rust-demo-app"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+test-utils = []
+
 [dependencies]
 anyhow.workspace = true
 
@@ -10,10 +13,17 @@ tokio.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
 
-rust-demo-commons = {  path = "../commons" }
+async-trait = "0.1.85"
+
+rust-demo-commons = { path = "../commons" }
 tx-model = { path = "../domain-tx" }
 
 uuid.workspace = true
 
 axum = "0.7.9"
 
+tokio-postgres = "0.7.12"
+sqlx = { version = "0.8", features = ["runtime-tokio", "tls-native-tls", "postgres", "uuid"] }
+
+[dev-dependencies]
+rust-demo-app = { path = "../demo_svc", version = "*", features = ["test-utils"] }
