@@ -24,6 +24,8 @@ axum = "0.7.9"
 
 tokio-postgres = "0.7.12"
 sqlx = { version = "0.8", features = ["runtime-tokio", "tls-native-tls", "postgres", "uuid"] }
+serde = { version = "1.0.216", features = ["derive"] }
+trait-variant = "0.1.2"
 
 [dev-dependencies]
 rust-demo-app = { path = "../demo_svc", version = "*", features = ["test-utils"] }
