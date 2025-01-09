@@ -195,7 +195,6 @@ pub mod tests {
     use super::*;
     use crate::accounts::api::WithdrawResult::NotEnoughBalance;
     use crate::accounts::api::{GetBalanceResult, WithdrawResult};
-    use std::ops::DerefMut;
 
     #[tokio::test]
     async fn core_logic() -> Result<()> {
