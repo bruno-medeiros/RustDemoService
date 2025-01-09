@@ -1,10 +1,10 @@
-use rust_demo_app::service;
-use rust_demo_app::service::accounts::SqlAccountsService;
+use rust_demo_app::accounts;
+use rust_demo_app::accounts::service::SqlAccountsService;
 use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
 
 #[tokio::test]
-async fn account_crud() -> anyhow::Result<()> {
+async fn accounts_it() -> anyhow::Result<()> {
     let conn_url = std::env::var("DATABASE_URL")
         .unwrap_or("postgres://postgres:example@localhost:5432/postgres".to_owned());
 
@@ -17,6 +17,6 @@ async fn account_crud() -> anyhow::Result<()> {
 
     let mut accounts = SqlAccountsService::create(pool.clone()).await?;
 
-    service::accounts::tests::test_svc(&mut accounts).await?;
+    accounts::service::tests::test_svc(&mut accounts).await?;
     Ok(())
 }

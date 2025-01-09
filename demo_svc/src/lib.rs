@@ -1,13 +1,20 @@
-pub mod service;
+pub mod accounts;
 
+use axum::routing::post;
 use axum::{routing::get, Router};
+use serde::Deserialize;
 use std::error::Error;
 
 #[tokio::main]
 pub async fn svc_main() -> Result<(), Box<dyn Error>> {
 
+    // SqlAccountsService::create();
+    let svc = ();
+
     // build our application with a single route
-    let app = Router::new().route("/", get(hello_endpoint));
+    let app = Router::new()
+        .route("/", get(hello_endpoint))
+        .route("/accounts", post(accounts::web::create_account).with_state(svc));
 
     // run our app with hyper, listening globally on port 3000
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
