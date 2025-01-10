@@ -5,5 +5,11 @@ fn main() {
         .with_max_level(Level::TRACE)
         .finish();
 
-    rust_demo_app::svc_main().unwrap()
+    let handle = std::thread::spawn(|| {
+        rust_demo_app::axum_example::svc_main(8082)
+    });
+
+    rust_demo_app::svc_main(8080).unwrap();
+
+    handle.join().unwrap().unwrap();
 }

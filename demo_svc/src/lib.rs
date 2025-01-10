@@ -1,23 +1,18 @@
 pub mod accounts;
+pub mod axum_example;
 
 use crate::accounts::service::SqlAccountsService;
-use crate::accounts::web::CreateAccount;
-use axum::extract::State;
 use axum::routing::post;
-use axum::{routing::get, Json, Router};
-use axum_macros::debug_handler;
-use serde::Deserialize;
+use axum::{routing::get, Router};
 use sqlx::postgres::PgPoolOptions;
 use std::error::Error;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tokio_postgres::types::ToSql;
+use tracing::info;
 
 #[tokio::main]
-pub async fn svc_main() -> Result<(), Box<dyn Error>> {
-
-    let conn_url = std::env::var("DATABASE_URL")
-        .unwrap_or("postgres://postgres:example@localhost:5432/postgres".to_owned());
+pub async fn svc_main(port: u32) -> Result<(), Box<dyn Error>> {
+    let conn_url = std::env::var("DATABASE_URL")?;
 
     // Create a connection pool
     let pool = PgPoolOptions::new()
@@ -26,22 +21,23 @@ pub async fn svc_main() -> Result<(), Box<dyn Error>> {
         .await?;
     let pool = Arc::new(pool);
     let accounts = SqlAccountsService::create(pool.clone()).await?;
-    let state = Arc::new(AppState { accounts : Arc::new(Mutex::new(accounts))});
+    let state = Arc::new(AppState {
+        accounts: Arc::new(Mutex::new(accounts)),
+    });
 
-    setup_routes(state).await
+    setup_routes(port, state).await?;
+    Ok(())
 }
 
-async fn setup_routes(state: Arc<AppState>) -> Result<(), Box<dyn Error>> {
-
+async fn setup_routes(port: u32, state: Arc<AppState>) -> anyhow::Result<()> {
     let app = Router::new()
-        .route("/", get(hello_endpoint))
-        .route("/foo", get(handler2))
         .route("/accounts", post(accounts::web::create_account))
-        .with_state(state)
-        ;
+        .route("/accounts/get_balance", post(accounts::web::get_balance))
+        .with_state(state);
 
-    // run our app with hyper, listening globally on port 3000
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let addr = format!("0.0.0.0:{port}");
+    let listener = tokio::net::TcpListener::bind(addr).await?;
+    info!("Listening on {addr}");
     axum::serve(listener, app).await?;
 
     Ok(())
@@ -49,18 +45,5 @@ async fn setup_routes(state: Arc<AppState>) -> Result<(), Box<dyn Error>> {
 
 #[derive(Clone)]
 pub struct AppState {
-    accounts : Arc<Mutex<SqlAccountsService>>,
-}
-
-async fn hello_endpoint() -> &'static str {
-    "Hello, World!\n"
-}
-
-
-#[debug_handler]
-async fn handler2(
-    State(state): State<Arc<AppState>>,
-    Json(payload): Json<CreateAccount>,
-) -> &'static str {
-    "Hello, World!\n"
+    accounts: Arc<Mutex<SqlAccountsService>>,
 }

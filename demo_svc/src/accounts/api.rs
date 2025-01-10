@@ -24,9 +24,9 @@ pub trait AccountsApi {
 
     async fn create_account(&mut self, description: &str) -> anyhow::Result<AccountId>;
 
-    async fn get_balance(&mut self, account_id: AccountId) -> anyhow::Result<GetBalanceResult>;
+    async fn get_balance(&mut self, account_id: &AccountId) -> anyhow::Result<GetBalanceResult>;
 
-    async fn deposit(&mut self, account_id: AccountId, amount: u32) -> anyhow::Result<GetBalanceResult>;
+    async fn deposit(&mut self, account_id: &AccountId, amount: u32) -> anyhow::Result<GetBalanceResult>;
 
     async fn withdraw(&mut self, account_id: AccountId, amount: u32) -> anyhow::Result<WithdrawResult>;
 

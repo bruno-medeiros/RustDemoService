@@ -34,16 +34,16 @@ impl AccountsApi for InMemoryAccountsService {
         Ok(id)
     }
 
-    async fn get_balance(&mut self, account_id: AccountId) -> Result<GetBalanceResult> {
+    async fn get_balance(&mut self, account_id: &AccountId) -> Result<GetBalanceResult> {
         match self.accounts.get(&account_id) {
-            None => Ok(GetBalanceResult::AccountNotFound(account_id)),
+            None => Ok(GetBalanceResult::AccountNotFound(account_id.clone())),
             Some(account) => Ok(GetBalanceResult::Ok(account.balance)),
         }
     }
 
-    async fn deposit(&mut self, account_id: AccountId, amount: u32) -> Result<GetBalanceResult> {
+    async fn deposit(&mut self, account_id: &AccountId, amount: u32) -> Result<GetBalanceResult> {
         match self.accounts.get_mut(&account_id) {
-            None => Ok(GetBalanceResult::AccountNotFound(account_id)),
+            None => Ok(GetBalanceResult::AccountNotFound(account_id.clone())),
             Some(account) => {
                 account.balance += amount;
                 Ok(GetBalanceResult::Ok(account.balance))
@@ -86,7 +86,7 @@ VALUES ($1, $2, $3);
         Ok(id)
     }
 
-    async fn get_balance(&mut self, account_id: AccountId) -> Result<GetBalanceResult> {
+    async fn get_balance(&mut self, account_id: &AccountId) -> Result<GetBalanceResult> {
         let query_result = sqlx::query(
             r#"
         SELECT balance
@@ -100,12 +100,12 @@ VALUES ($1, $2, $3);
         .await?;
 
         Ok(match query_result {
-            None => GetBalanceResult::AccountNotFound(account_id),
+            None => GetBalanceResult::AccountNotFound(account_id.clone()),
             Some(balance) => GetBalanceResult::Ok(balance.try_into()?),
         })
     }
 
-    async fn deposit(&mut self, account_id: AccountId, amount: u32) -> Result<GetBalanceResult> {
+    async fn deposit(&mut self, account_id: &AccountId, amount: u32) -> Result<GetBalanceResult> {
         let amount : i32 = amount.try_into()?;
         let result = sqlx::query(
             r#"
@@ -123,7 +123,7 @@ VALUES ($1, $2, $3);
         if result.rows_affected() == 1 {
             self.get_balance(account_id).await
         } else {
-            Ok(GetBalanceResult::AccountNotFound(account_id))
+            Ok(GetBalanceResult::AccountNotFound(account_id.clone()))
         }
     }
 
@@ -142,7 +142,7 @@ VALUES ($1, $2, $3);
         .execute(self.pool.as_ref())
         .await?;
 
-        let balance = match self.get_balance(account_id).await? {
+        let balance = match self.get_balance(&account_id).await? {
             GetBalanceResult::Ok(balance) => balance,
             GetBalanceResult::AccountNotFound(id) => {
                 return Ok(WithdrawResult::AccountNotFound(id))
@@ -208,10 +208,10 @@ pub mod tests {
 
     pub async fn test_svc<T: AccountsApi + ?Sized>(svc: &mut T) -> Result<()> {
         let acct = svc.create_account("Some desc").await?;
-        let res = svc.get_balance(acct).await?;
+        let res = svc.get_balance(&acct).await?;
         assert_eq!(res, GetBalanceResult::Ok(0));
 
-        let res = svc.deposit(acct, 100).await?;
+        let res = svc.deposit(&acct, 100).await?;
         assert_eq!(res, GetBalanceResult::Ok(100));
 
         let res = svc.withdraw(acct, 200).await?;
