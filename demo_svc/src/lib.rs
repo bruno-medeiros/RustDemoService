@@ -5,20 +5,22 @@ use crate::accounts::service::SqlAccountsService;
 use axum::routing::post;
 use axum::Router;
 use sqlx::postgres::PgPoolOptions;
-use std::error::Error;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tracing::info;
 
 #[tokio::main]
-pub async fn svc_main(port: u32) -> Result<(), Box<dyn Error>> {
-    let conn_url = std::env::var("DATABASE_URL")?;
+pub async fn svc_main(port: u32, conn_url: String) -> anyhow::Result<()> {
 
-    // Create a connection pool
+    let rt = tokio::runtime::Handle::current();
+    info!("RT: {:?} {:?} \n{:?}", rt.runtime_flavor(), rt.metrics(), rt);
+
+    info!("Creating connection pool...");
     let pool = PgPoolOptions::new()
         .max_connections(5)
         .connect(&conn_url)
         .await?;
+    info!("Created connection pool.");
     let pool = Arc::new(pool);
     let accounts = SqlAccountsService::create(pool.clone()).await?;
     let state = Arc::new(AppState {
@@ -33,6 +35,8 @@ async fn setup_routes(port: u32, state: Arc<AppState>) -> anyhow::Result<()> {
     let app = Router::new()
         .route("/accounts", post(accounts::web::create_account))
         .route("/accounts/get_balance", post(accounts::web::get_balance))
+        .route("/accounts/deposit", post(accounts::web::deposit))
+        .route("/accounts/withdraw", post(accounts::web::withdraw))
         .with_state(state);
 
     let addr = format!("0.0.0.0:{port}");

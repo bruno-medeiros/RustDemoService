@@ -1,4 +1,4 @@
-use crate::accounts::api::{AccountsApi, GetBalanceResult, WithdrawResult};
+use crate::accounts::api::{AccountsApi, DepositResult, GetBalanceResult, WithdrawResult};
 use anyhow::{bail, Result};
 use async_trait::async_trait;
 use sqlx::postgres::PgRow;
@@ -6,7 +6,7 @@ use sqlx::{Pool, Postgres, Row};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tracing::info;
-use tx_model::{AccountId, Account};
+use tx_model::{Account, AccountId};
 use uuid::Uuid;
 
 pub struct InMemoryAccountsService {
@@ -42,12 +42,12 @@ impl AccountsApi for InMemoryAccountsService {
         }
     }
 
-    async fn deposit(&mut self, account_id: &AccountId, amount: u32) -> Result<GetBalanceResult> {
+    async fn deposit(&mut self, account_id: &AccountId, amount: u32) -> Result<DepositResult> {
         match self.accounts.get_mut(&account_id) {
-            None => Ok(GetBalanceResult::AccountNotFound(account_id.clone())),
+            None => Ok(DepositResult::AccountNotFound(account_id.clone())),
             Some(account) => {
                 account.balance += amount;
-                Ok(GetBalanceResult::Ok(account.balance))
+                Ok(DepositResult::Ok(account.balance))
             }
         }
     }
@@ -106,7 +106,7 @@ VALUES ($1, $2, $3);
         })
     }
 
-    async fn deposit(&mut self, account_id: &AccountId, amount: u32) -> Result<GetBalanceResult> {
+    async fn deposit(&mut self, account_id: &AccountId, amount: u32) -> Result<DepositResult> {
         let amount : i32 = amount.try_into()?;
         let result = sqlx::query(
             r#"
@@ -122,9 +122,12 @@ VALUES ($1, $2, $3);
 
         // TODO: transaction
         if result.rows_affected() == 1 {
-            self.get_balance(account_id).await
+            Ok(match self.get_balance(account_id).await? {
+                GetBalanceResult::Ok(ok) => { DepositResult::Ok(ok) }
+                GetBalanceResult::AccountNotFound(act) => { DepositResult::AccountNotFound(act) }
+            })
         } else {
-            Ok(GetBalanceResult::AccountNotFound(account_id.clone()))
+            Ok(DepositResult::AccountNotFound(account_id.clone()))
         }
     }
 
@@ -215,14 +218,14 @@ pub mod tests {
         assert_eq!(res, GetBalanceResult::Ok(0));
 
         let res = svc.deposit(&acct, 100).await?;
-        assert_eq!(res, GetBalanceResult::Ok(100));
+        assert_eq!(res, DepositResult::Ok(100));
 
-        let res = svc.withdraw(acct, 200).await?;
+        let res = svc.withdraw(&acct, 200).await?;
         assert_eq!(res, NotEnoughBalance(100));
 
-        let res = svc.withdraw(acct, 40).await?;
+        let res = svc.withdraw(&acct, 40).await?;
         assert_eq!(res, WithdrawResult::Ok(60));
-        let res = svc.withdraw(acct, 60).await?;
+        let res = svc.withdraw(&acct, 60).await?;
         assert_eq!(res, WithdrawResult::Ok(00));
 
         Ok(())

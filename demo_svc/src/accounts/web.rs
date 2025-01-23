@@ -1,4 +1,4 @@
-use crate::accounts::api::{AccountsApi, GetBalanceResult, WithdrawResult};
+use crate::accounts::api::{AccountsApi, DepositResult, GetBalanceResult, WithdrawResult};
 use crate::AppState;
 use axum::extract::State;
 use axum::http::StatusCode;
@@ -19,6 +19,12 @@ pub struct CreateAccount {
 pub struct CreateAccountResponse {
     // #[serde(with = "uuid::serde::simple")]
     id: Uuid,
+}
+
+#[derive(Deserialize)]
+pub struct DepositParams {
+    account_id: AccountId,
+    amount: u32,
 }
 
 #[derive(Deserialize)]
@@ -57,6 +63,28 @@ pub async fn get_balance(
             (StatusCode::OK, Json(balance)).into_response()
         }
         Ok(GetBalanceResult::AccountNotFound(account_id)) => {
+            (StatusCode::NOT_FOUND, Json(account_id)).into_response()
+        }
+        Err(err) => {
+            (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response()
+        }
+    }
+}
+
+
+pub async fn deposit(
+    State(state): State<Arc<AppState>>,
+    Json(params): Json<DepositParams>,
+) -> Response {
+    let mut accounts = state.accounts.lock().await;
+
+    let result = accounts.deposit(&params.account_id, params.amount).await;
+
+    match result {
+        Ok(DepositResult::Ok(balance)) => {
+            (StatusCode::OK, Json(balance)).into_response()
+        }
+        Ok(DepositResult::AccountNotFound(account_id)) => {
             (StatusCode::NOT_FOUND, Json(account_id)).into_response()
         }
         Err(err) => {

@@ -10,6 +10,12 @@ pub enum GetBalanceResult {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum DepositResult {
+    Ok(Balance),
+    AccountNotFound(AccountId),
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum WithdrawResult {
     Ok(Balance),
     AccountNotFound(AccountId),
@@ -26,7 +32,7 @@ pub trait AccountsApi {
 
     async fn get_balance(&mut self, account_id: &AccountId) -> anyhow::Result<GetBalanceResult>;
 
-    async fn deposit(&mut self, account_id: &AccountId, amount: u32) -> anyhow::Result<GetBalanceResult>;
+    async fn deposit(&mut self, account_id: &AccountId, amount: u32) -> anyhow::Result<DepositResult>;
 
     async fn withdraw(&mut self, account_id: &AccountId, amount: u32) -> anyhow::Result<WithdrawResult>;
 
