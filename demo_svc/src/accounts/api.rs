@@ -28,7 +28,7 @@ pub trait AccountsApi {
 
     async fn deposit(&mut self, account_id: &AccountId, amount: u32) -> anyhow::Result<GetBalanceResult>;
 
-    async fn withdraw(&mut self, account_id: AccountId, amount: u32) -> anyhow::Result<WithdrawResult>;
+    async fn withdraw(&mut self, account_id: &AccountId, amount: u32) -> anyhow::Result<WithdrawResult>;
 
     #[allow(unused_variables)]
     async fn transfer(&mut self, from: AccountId, balance: u32, to: AccountId) -> anyhow::Result<u32> {
@@ -37,7 +37,7 @@ pub trait AccountsApi {
 }
 
 
-/// Future version of the service API.
+/// Upcoming version of the service API.
 /// Needs trait-variant to be able to make it object-safe
 /// See: https://blog.rust-lang.org/2023/12/21/async-fn-rpit-in-traits.html#where-the-gaps-lie
 #[trait_variant::make(AccountsApi2: Send)]

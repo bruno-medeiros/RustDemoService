@@ -5,7 +5,8 @@ use sqlx::postgres::PgRow;
 use sqlx::{Pool, Postgres, Row};
 use std::collections::HashMap;
 use std::sync::Arc;
-use tx_model::{Account, AccountId};
+use tracing::info;
+use tx_model::{AccountId, Account};
 use uuid::Uuid;
 
 pub struct InMemoryAccountsService {
@@ -51,9 +52,9 @@ impl AccountsApi for InMemoryAccountsService {
         }
     }
 
-    async fn withdraw(&mut self, account_id: AccountId, amount: u32) -> Result<WithdrawResult> {
+    async fn withdraw(&mut self, account_id: &AccountId, amount: u32) -> Result<WithdrawResult> {
         match self.accounts.get_mut(&account_id) {
-            None => Ok(WithdrawResult::AccountNotFound(account_id)),
+            None => Ok(WithdrawResult::AccountNotFound(account_id.clone())),
             Some(account) => {
                 if account.balance < amount {
                     return Ok(WithdrawResult::NotEnoughBalance(account.balance));
@@ -127,7 +128,7 @@ VALUES ($1, $2, $3);
         }
     }
 
-    async fn withdraw(&mut self, account_id: AccountId, amount: u32) -> Result<WithdrawResult> {
+    async fn withdraw(&mut self, account_id: &AccountId, amount: u32) -> anyhow::Result<WithdrawResult> {
         // TODO: transaction
 
         let result = sqlx::query(
@@ -169,6 +170,8 @@ pub struct SqlAccountsService {
 impl SqlAccountsService {
     pub async fn create(pool: Arc<Pool<Postgres>>) -> Result<Self> {
         // TODO: use DB migrations
+
+        info!("Initializing Accounts Table");
 
         let option: Option<PgRow> = sqlx::query(
             r#"

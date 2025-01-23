@@ -3,7 +3,7 @@ pub mod axum_example;
 
 use crate::accounts::service::SqlAccountsService;
 use axum::routing::post;
-use axum::{routing::get, Router};
+use axum::Router;
 use sqlx::postgres::PgPoolOptions;
 use std::error::Error;
 use std::sync::Arc;
@@ -36,8 +36,8 @@ async fn setup_routes(port: u32, state: Arc<AppState>) -> anyhow::Result<()> {
         .with_state(state);
 
     let addr = format!("0.0.0.0:{port}");
-    let listener = tokio::net::TcpListener::bind(addr).await?;
     info!("Listening on {addr}");
+    let listener = tokio::net::TcpListener::bind(addr).await?;
     axum::serve(listener, app).await?;
 
     Ok(())

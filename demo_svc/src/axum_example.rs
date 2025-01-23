@@ -2,7 +2,6 @@ use axum::extract::{Query, State};
 use axum::{routing::get, Router};
 use std::collections::HashMap;
 use std::sync::Arc;
-use axum_macros::debug_handler;
 use tracing::info;
 
 #[tokio::main]
@@ -17,8 +16,8 @@ pub async fn svc_main(port: u32) -> anyhow::Result<()> {
         .with_state(state);
 
     let addr = format!("0.0.0.0:{port}");
-    let listener = tokio::net::TcpListener::bind(addr).await?;
     info!("(Axum Example) Listening on {addr}");
+    let listener = tokio::net::TcpListener::bind(addr).await?;
     axum::serve(listener, app).await?;
 
     Ok(())
