@@ -1510,12 +1510,11 @@ dependencies = [
  "async-trait",
  "axum",
  "axum-macros",
- "hyper",
- "hyper-util",
  "reqwest",
  "rust-demo-app",
  "rust-demo-commons",
  "serde",
+ "serde_json",
  "sqlx",
  "tokio",
  "tokio-postgres",
@@ -1541,9 +1540,7 @@ name = "rust-snippets"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "tokio",
- "tracing",
- "tracing-subscriber",
+ "serde_json",
 ]
 
 [[package]]
@@ -1676,9 +1673,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.133"
+version = "1.0.137"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7fceb2473b9166b2294ef05efcb65a3db80803f0b03ef86a5fc88a2b85ee377"
+checksum = "930cfb6e6abf99298aaad7d29abbef7a9999a9a8806a40088f55f0dcec03146b"
 dependencies = [
  "itoa",
  "memchr",

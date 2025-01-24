@@ -1,9 +1,10 @@
 use rust_demo_app::accounts;
 use rust_demo_app::accounts::service::SqlAccountsService;
+use rust_demo_app::accounts::web::CreateAccountResponse;
 use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
 use std::thread;
-use tracing::{info, Level};
+use tracing::Level;
 
 #[tokio::test]
 async fn accounts_it() -> anyhow::Result<()> {
@@ -35,7 +36,7 @@ async fn accounts_webapp() -> anyhow::Result<()> {
 
     let conn_url = std::env::var("DATABASE_URL")?;
 
-    let handle = thread::spawn(|| {
+    let _thandle = thread::spawn(|| {
         // TODO: use random port?
         rust_demo_app::svc_main(11180, conn_url)
     });
@@ -54,10 +55,10 @@ async fn accounts_webapp() -> anyhow::Result<()> {
         .send()
         .await?;
 
-    let sc = res.status();
+    assert_eq!(res.status(), reqwest::StatusCode::CREATED);
     let body = res.text().await?;
-    info!("Result status = {sc} body: {body:?}");
+    let _res: CreateAccountResponse = serde_json::from_str(&body)?;
 
-    handle.join().unwrap()?;
+    //handle.join().unwrap()?;
     Ok(())
 }

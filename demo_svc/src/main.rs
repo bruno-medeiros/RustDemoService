@@ -15,7 +15,6 @@ fn main() -> anyhow::Result<()> {
             .enable_all()
             .build()?;
 
-        // rt.block_on(async { rust_demo_app::svc_main(8085, conn_url) })
-        rust_demo_app::svc_main(8085, conn_url)
+        rt.block_on(rust_demo_app::svc_main(8085, conn_url))
     })
 }

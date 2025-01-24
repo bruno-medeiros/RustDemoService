@@ -1,6 +1,6 @@
 mod error_handling;
 mod lifetimes;
-
+mod json;
 
 mod equality {
     //noinspection RsAssertEqual

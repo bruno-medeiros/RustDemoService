@@ -15,7 +15,7 @@ pub struct CreateAccount {
     description: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct CreateAccountResponse {
     // #[serde(with = "uuid::serde::simple")]
     id: Uuid,
