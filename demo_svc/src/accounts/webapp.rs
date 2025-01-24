@@ -1,11 +1,16 @@
 use crate::accounts::api::{AccountsApi, DepositResult, GetBalanceResult, WithdrawResult};
+use crate::accounts::service::SqlAccountsService;
 use crate::AppState;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-use axum::Json;
+use axum::routing::post;
+use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
+use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
+use tokio::sync::Mutex;
+use tracing::info;
 use tx_model::AccountId;
 use uuid::Uuid;
 
@@ -115,4 +120,31 @@ pub async fn withdraw(
             (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response()
         }
     }
+}
+
+pub fn create_webapp(accounts: SqlAccountsService) -> Router {
+    let state = Arc::new(AppState {
+        accounts: Arc::new(Mutex::new(accounts)),
+    });
+    let app = Router::new()
+        .route("/accounts", post(create_account))
+        .route("/accounts/get_balance", post(get_balance))
+        .route("/accounts/deposit", post(deposit))
+        .route("/accounts/withdraw", post(withdraw))
+        .with_state(state);
+    app
+}
+
+pub async fn create_app(conn_url: &String) -> anyhow::Result<Router> {
+    info!("Creating connection pool...");
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&conn_url)
+        .await?;
+    let pool = Arc::new(pool);
+
+    let accounts = SqlAccountsService::create(pool.clone()).await?;
+
+    let app = create_webapp(accounts);
+    Ok(app)
 }

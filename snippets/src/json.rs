@@ -28,6 +28,18 @@ mod tests {
         let v1: Value = serde_json::from_str(DATA)?;
         let v2: Value = serde_json::from_str(DATA2)?;
         assert_eq!(v1, v2);
+
+        let v3 = r#"
+        {
+            "age": 43,
+            "phones": [
+                "+44 2345678"
+                "+44 1234567",
+            ]
+            "name": "John Doe",
+        }"#;
+        let v3: Value = serde_json::from_str(v3)?;
+        assert_eq!(v1, v3);
         Ok(())
     }
 

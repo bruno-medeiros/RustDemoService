@@ -1,10 +1,12 @@
 use rust_demo_app::accounts;
 use rust_demo_app::accounts::service::SqlAccountsService;
-use rust_demo_app::accounts::web::CreateAccountResponse;
+use rust_demo_app::accounts::webapp::CreateAccountResponse;
 use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
-use std::thread;
 use tracing::Level;
+
+use rust_demo_app::accounts::webapp;
+use rust_demo_app::app_util::AppControl;
 
 #[tokio::test]
 async fn accounts_it() -> anyhow::Result<()> {
@@ -36,29 +38,29 @@ async fn accounts_webapp() -> anyhow::Result<()> {
 
     let conn_url = std::env::var("DATABASE_URL")?;
 
-    let _thandle = thread::spawn(|| {
-        // TODO: use random port?
-        rust_demo_app::svc_main(11180, conn_url)
-    });
+    let app = webapp::create_app(&conn_url).await?;
 
-    // TODO: use startup signals
-    tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+    let (app_control, app_latches) = AppControl::new_with_latches();
+
+    tokio::runtime::Handle::current().spawn(app_control.start(11180, app));
+
+    let addr = app_latches.started_latch.await?;
 
     let res = reqwest::Client::new()
-        .post("http://127.0.0.1:11180/accounts")
+        // .post(format!("http://{addr}/accounts"))
+        .post(format!("http://127.0.0.1:11180/accounts"))
         .header(reqwest::header::CONTENT_TYPE, "application/json")
         .body(
             r#"{
             "description" : "IntegTest account"
         }"#,
-        )
-        .send()
-        .await?;
+        ).send().await?;
 
     assert_eq!(res.status(), reqwest::StatusCode::CREATED);
     let body = res.text().await?;
     let _res: CreateAccountResponse = serde_json::from_str(&body)?;
 
+    //app_latches.terminated_latch.await?;
     //handle.join().unwrap()?;
     Ok(())
 }
