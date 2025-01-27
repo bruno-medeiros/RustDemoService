@@ -13,7 +13,7 @@ members = [
 anyhow = "1.0.94"
 tracing = "0.1"
 
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter", "time"] }
 tokio = { version = "1.42", features = ["full"] }
 async-trait = "0.1.85"
 

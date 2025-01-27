@@ -3,9 +3,7 @@ use tokio_postgres::{Error, NoTls};
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 async fn tokio_postgres_example() -> Result<(), Error> {
-    tracing_subscriber::fmt()
-        .with_max_level(Level::INFO)
-        .init();
+    test_commons::init_logging();
 
     let pass = "example";
 
@@ -32,14 +30,12 @@ async fn tokio_postgres_example() -> Result<(), Error> {
 }
 
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions, PgRow};
-use tracing::Level;
+use rust_demo_commons::test_commons;
 
 // #[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 #[tokio::test]
 async fn sqlx_example() -> Result<(), sqlx::Error> {
-    tracing_subscriber::fmt()
-        .with_max_level(Level::INFO)
-        .init();
+    test_commons::init_logging();
 
     let conn_url = std::env::var("DATABASE_URL")
         .unwrap_or("postgres://postgres:example@localhost:5432/postgres".to_owned());

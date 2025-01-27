@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-test-utils = []
+test-utils = ["rust-demo-commons/test-utils"]
 
 [dependencies]
 anyhow.workspace = true
@@ -13,13 +13,15 @@ tracing-subscriber.workspace = true
 
 tokio.workspace = true
 async-trait.workspace = true
+serde_json = "1.0"
+serde = { version = "1.0.216", features = ["derive"] }
+trait-variant = "0.1.2"
 
 uuid.workspace = true
 
 rust-demo-commons = { path = "../commons" }
 tx-model = { path = "../domain-tx" }
 
-serde_json = "1.0"
 
 axum = "0.7.9"
 axum-macros = "0.5.0"
@@ -27,8 +29,6 @@ tower = "0.5.2"
 
 tokio-postgres = "0.7.12"
 sqlx = { version = "0.8", features = ["runtime-tokio", "tls-native-tls", "postgres", "uuid"] }
-serde = { version = "1.0.216", features = ["derive"] }
-trait-variant = "0.1.2"
 #hyper = "1.5.1"
 #hyper-util = "0.1.10"
 reqwest = "0.12.12"

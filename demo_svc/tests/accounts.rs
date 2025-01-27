@@ -3,16 +3,14 @@ use rust_demo_app::accounts::service::SqlAccountsService;
 use rust_demo_app::accounts::webapp::CreateAccountResponse;
 use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
-use tracing::Level;
 
 use rust_demo_app::accounts::webapp;
 use rust_demo_app::app_util::AppControl;
+use rust_demo_commons::test_commons;
 
 #[tokio::test]
 async fn accounts_it() -> anyhow::Result<()> {
-    tracing_subscriber::fmt()
-        .with_max_level(Level::DEBUG)
-        .init();
+    test_commons::init_logging();
 
     let conn_url = std::env::var("DATABASE_URL")
         .unwrap_or("postgres://postgres:example@localhost:5432/postgres".to_owned());
@@ -32,9 +30,7 @@ async fn accounts_it() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn accounts_webapp() -> anyhow::Result<()> {
-    tracing_subscriber::fmt()
-        .with_max_level(Level::DEBUG)
-        .init();
+    test_commons::init_logging();
 
     let conn_url = std::env::var("DATABASE_URL")?;
 

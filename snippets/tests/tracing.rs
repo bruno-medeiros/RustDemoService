@@ -1,22 +1,42 @@
-use tracing::info;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+mod common;
+
+use std::thread;
+use std::time::Duration;
+use time::UtcOffset;
+use tracing::{info, warn, Level};
+use tracing_subscriber::fmt::time::OffsetTime;
 
 #[test]
-fn tracing() {
-    // TODO: tracing review
+fn tracing_subscriber_default() {
+    tracing_subscriber::fmt().try_init().ok();
 
-    tracing_subscriber::registry()
-        .with(
-            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
-                format!(
-                    "{}=debug,tower_http=debug,axum=trace",
-                    env!("CARGO_CRATE_NAME")
-                )
-                    .into()
-            }),
-        )
-        .with(tracing_subscriber::fmt::layer().without_time())
-        .init();
-
-    info!("hello");
+    info!("Hello, world!");
 }
+
+#[test]
+fn tracing_subscriber_commons() {
+    common::init_logging();
+
+    info!("Hello, world!");
+    thread::sleep(Duration::from_millis(200));
+    warn!("Warning!!!");
+}
+
+#[test]
+fn tracing_subscriber_short_time() {
+    use time::macros::format_description;
+
+    let offset = UtcOffset::current_local_offset().expect("should get local offset!");
+    let timer = OffsetTime::new(offset, format_description!("[hour]:[minute]:[second].[subsecond digits:5]"));
+
+    tracing_subscriber::fmt()
+        .with_max_level(Level::INFO)
+        .with_timer(timer)
+        .try_init()
+        .ok();
+
+    info!("Hello, world!");
+    thread::sleep(Duration::from_millis(200));
+    warn!("Warning!!!");
+}
+
