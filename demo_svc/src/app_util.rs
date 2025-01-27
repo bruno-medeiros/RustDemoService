@@ -32,15 +32,10 @@ impl AppControl {
         )
     }
 
-    pub async fn start(self, port: u32, app: Router) -> anyhow::Result<()> {
-        let addr = format!("0.0.0.0:{port}");
+    pub async fn start(self, addr : String, app: Router) -> anyhow::Result<()> {
         let listener = tokio::net::TcpListener::bind(addr).await?;
         let bound_addr: SocketAddr = listener.local_addr()?;
         info!("Listening on {}", bound_addr);
-
-        // Test the latch
-        #[cfg(test)]
-        tokio::time::sleep(Duration::from_secs(1)).await;
 
         self.started_latch.send(bound_addr).ok();
 

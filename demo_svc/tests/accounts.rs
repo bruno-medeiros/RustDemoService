@@ -3,7 +3,7 @@ use rust_demo_app::accounts::service::SqlAccountsService;
 use rust_demo_app::accounts::webapp::CreateAccountResponse;
 use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
-
+use tracing::info;
 use rust_demo_app::accounts::webapp;
 use rust_demo_app::app_util::AppControl;
 use rust_demo_commons::test_commons;
@@ -38,13 +38,14 @@ async fn accounts_webapp() -> anyhow::Result<()> {
 
     let (app_control, app_latches) = AppControl::new_with_latches();
 
-    tokio::runtime::Handle::current().spawn(app_control.start(11180, app));
+    let addr = "127.0.0.1:0".to_string();
+    tokio::runtime::Handle::current().spawn(app_control.start(addr, app));
 
     let addr = app_latches.started_latch.await?;
+    info!("Received addr: {addr}");
 
     let res = reqwest::Client::new()
-        // .post(format!("http://{addr}/accounts"))
-        .post(format!("http://127.0.0.1:11180/accounts"))
+        .post(format!("http://{addr}/accounts"))
         .header(reqwest::header::CONTENT_TYPE, "application/json")
         .body(
             r#"{
