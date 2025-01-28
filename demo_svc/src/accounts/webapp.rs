@@ -14,33 +14,32 @@ use tracing::info;
 use tx_model::AccountId;
 use uuid::Uuid;
 
-// the input to our `create_user` handler
-#[derive(Deserialize)]
-pub struct CreateAccount {
-    description: String,
+#[derive(Serialize, Deserialize)]
+pub struct CreateAccountParams {
+    pub description: String,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct CreateAccountResponse {
     // #[serde(with = "uuid::serde::simple")]
-    id: Uuid,
+    pub id: Uuid,
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct DepositParams {
-    account_id: AccountId,
-    amount: u32,
+    pub account_id: AccountId,
+    pub amount: u32,
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct WithdrawParams {
-    account_id: AccountId,
-    amount: u32,
+    pub account_id: AccountId,
+    pub amount: u32,
 }
 
 pub async fn create_account(
     State(state): State<Arc<AppState>>,
-    Json(payload): Json<CreateAccount>,
+    Json(payload): Json<CreateAccountParams>,
 ) -> Response {
     let mut accounts = state.accounts.lock().await;
 
@@ -68,7 +67,7 @@ pub async fn get_balance(
             (StatusCode::OK, Json(balance)).into_response()
         }
         Ok(GetBalanceResult::AccountNotFound(account_id)) => {
-            (StatusCode::NOT_FOUND, Json(account_id)).into_response()
+            (StatusCode::BAD_REQUEST, Json(account_id)).into_response()
         }
         Err(err) => {
             (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response()
@@ -90,7 +89,7 @@ pub async fn deposit(
             (StatusCode::OK, Json(balance)).into_response()
         }
         Ok(DepositResult::AccountNotFound(account_id)) => {
-            (StatusCode::NOT_FOUND, Json(account_id)).into_response()
+            (StatusCode::BAD_REQUEST, Json(account_id)).into_response()
         }
         Err(err) => {
             (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response()

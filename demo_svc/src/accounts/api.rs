@@ -1,21 +1,22 @@
 use async_trait::async_trait;
 use std::todo;
+use serde::Deserialize;
 use tx_model::{AccountId, Balance};
 
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Deserialize)]
 pub enum GetBalanceResult {
     Ok(Balance),
     AccountNotFound(AccountId),
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Deserialize)]
 pub enum DepositResult {
     Ok(Balance),
     AccountNotFound(AccountId),
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Deserialize)]
 pub enum WithdrawResult {
     Ok(Balance),
     AccountNotFound(AccountId),
