@@ -1,15 +1,15 @@
-use std::net::SocketAddr;
+use anyhow::Result;
 use rust_demo_app::accounts;
 use rust_demo_app::accounts::service::SqlAccountsService;
+use rust_demo_app::accounts::webapp;
 use rust_demo_app::accounts::webapp::CreateAccountResponse;
+use rust_demo_app::accounts::webclient::AccountsServiceClient;
+use rust_demo_app::app_util::{AppControl, AppStarter};
+use rust_demo_commons::test_commons;
 use sqlx::postgres::PgPoolOptions;
+use std::net::SocketAddr;
 use std::sync::Arc;
 use tracing::info;
-use rust_demo_app::accounts::webapp;
-use rust_demo_app::app_util::AppControl;
-use rust_demo_commons::test_commons;
-use anyhow::Result;
-use rust_demo_app::accounts::webclient::AccountsServiceClient;
 
 #[tokio::test]
 async fn accounts_it() -> Result<()> {
@@ -38,12 +38,12 @@ async fn accounts_webapp() -> Result<()> {
 
     let app = webapp::create_app(&conn_url).await?;
 
-    let (app_starter, app_latches) = AppControl::new_with_latches();
+    let (app_starter, app_control) = AppStarter::new_with_latches();
 
     let addr = "127.0.0.1:0".to_string();
     tokio::runtime::Handle::current().spawn(app_starter.start(addr, app));
 
-    let addr = app_latches.started_latch.await?;
+    let addr = app_control.started_latch.await?;
     info!("Received addr: {addr}");
 
     test_websvc_direct(addr).await?;
@@ -52,9 +52,8 @@ async fn accounts_webapp() -> Result<()> {
     let mut web_client = AccountsServiceClient::new(&format!("http://{addr}/"));
     accounts::service::tests::test_svc(&mut web_client).await?;
 
-    // app_control.terminated_latch.send(())?;
-    // app_latches.terminated_latch.await?;
-    //handle.join().unwrap()?;
+    AppControl::shutdown_and_await(app_control.shutdown_signal, app_control.terminated_latch)
+        .await?;
     Ok(())
 }
 
@@ -66,11 +65,12 @@ async fn test_websvc_direct(addr: SocketAddr) -> Result<()> {
             r#"{
             "description" : "IntegTest account"
         }"#,
-        ).send().await?;
+        )
+        .send()
+        .await?;
 
     assert_eq!(res.status(), reqwest::StatusCode::CREATED);
     let body = res.text().await?;
     let _res: CreateAccountResponse = serde_json::from_str(&body)?;
     Ok(())
 }
-
