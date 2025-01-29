@@ -60,7 +60,7 @@ async fn accounts_webapp() -> Result<()> {
 
 async fn test_websvc_direct(addr: SocketAddr) -> Result<()> {
     let res = reqwest::Client::new()
-        .post(format!("http://{addr}/accounts"))
+        .post(format!("http://{addr}/accounts/"))
         .header(reqwest::header::CONTENT_TYPE, "application/json")
         .body(
             r#"{

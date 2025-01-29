@@ -1,11 +1,11 @@
-use std::str::FromStr;
 use crate::accounts::api::{AccountsApi, DepositResult, GetBalanceResult, WithdrawResult};
 use crate::accounts::webapp::{CreateAccountParams, CreateAccountResponse, DepositParams, WithdrawParams};
 use async_trait::async_trait;
 use axum::http::Uri;
-use reqwest::{Client, Url};
+use reqwest::Client;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
+use std::str::FromStr;
 use tracing::debug;
 use tx_model::AccountId;
 
@@ -57,7 +57,7 @@ impl AccountsApi for AccountsServiceClient {
         };
 
         let res = self
-            .send_request::<_, CreateAccountResponse>("accounts", &params)
+            .send_request::<_, CreateAccountResponse>("accounts/", &params)
             .await?;
         Ok(res.id)
     }

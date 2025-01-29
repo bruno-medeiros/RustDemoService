@@ -126,7 +126,7 @@ pub fn create_webapp(accounts: SqlAccountsService) -> Router {
         accounts: Arc::new(Mutex::new(accounts)),
     });
     let app = Router::new()
-        .route("/accounts", post(create_account))
+        .route("/accounts/", post(create_account))
         .route("/accounts/get_balance", post(get_balance))
         .route("/accounts/deposit", post(deposit))
         .route("/accounts/withdraw", post(withdraw))

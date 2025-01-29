@@ -1572,11 +1572,13 @@ name = "rust-snippets"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "http",
  "serde",
  "serde_json",
  "time",
  "tracing",
  "tracing-subscriber",
+ "url",
  "uuid",
 ]
 

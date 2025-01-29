@@ -1,10 +1,10 @@
 use async_trait::async_trait;
 use std::todo;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use tx_model::{AccountId, Balance};
 
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum GetBalanceResult {
     Ok(Balance),
     AccountNotFound(AccountId),
