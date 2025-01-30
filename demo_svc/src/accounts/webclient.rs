@@ -1,5 +1,4 @@
-use crate::accounts::api::{AccountsApi, DepositResult, GetBalanceResult, WithdrawResult};
-use crate::accounts::webapp::{CreateAccountParams, CreateAccountResponse, DepositParams, WithdrawParams};
+use crate::accounts::api::{AccountsApi, CreateAccountParams, CreateAccountResponse, DepositParams, DepositResult, GetBalanceResult, WithdrawParams, WithdrawResult};
 use async_trait::async_trait;
 use axum::http::Uri;
 use reqwest::Client;
@@ -51,22 +50,19 @@ impl AccountsServiceClient {
 
 #[async_trait]
 impl AccountsApi for AccountsServiceClient {
-    async fn create_account(&mut self, description: &str) -> anyhow::Result<AccountId> {
+    async fn create_account(&mut self, description: &str) -> anyhow::Result<CreateAccountResponse> {
         let params = CreateAccountParams {
             description: description.to_string(),
         };
 
-        let res = self
-            .send_request::<_, CreateAccountResponse>("accounts/", &params)
-            .await?;
-        Ok(res.id)
+        self.send_request::<_, CreateAccountResponse>("accounts/", &params)
+            .await
     }
 
     async fn get_balance(&mut self, account_id: &AccountId) -> anyhow::Result<GetBalanceResult> {
-        let res = self
+        self
             .send_request::<_, GetBalanceResult>("accounts/get_balance", &account_id)
-            .await?;
-        Ok(res)
+            .await
     }
 
     async fn deposit(
@@ -78,10 +74,7 @@ impl AccountsApi for AccountsServiceClient {
             account_id: account_id.clone(),
             amount,
         };
-        let res = self
-            .send_request("accounts/deposit", &params)
-            .await?;
-        Ok(res)
+        self.send_request("accounts/deposit", &params).await
     }
 
     async fn withdraw(
@@ -93,9 +86,6 @@ impl AccountsApi for AccountsServiceClient {
             account_id: account_id.clone(),
             amount,
         };
-        let res = self
-            .send_request("accounts/withdraw/", &params)
-            .await?;
-        Ok(res)
+        self.send_request("accounts/withdraw", &params).await
     }
 }

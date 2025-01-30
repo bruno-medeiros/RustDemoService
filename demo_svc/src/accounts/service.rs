@@ -1,4 +1,6 @@
-use crate::accounts::api::{AccountsApi, DepositResult, GetBalanceResult, WithdrawResult};
+use crate::accounts::api::{
+    AccountsApi, CreateAccountResponse, DepositResult, GetBalanceResult, WithdrawResult,
+};
 use anyhow::{bail, Result};
 use async_trait::async_trait;
 use sqlx::postgres::PgRow;
@@ -23,7 +25,7 @@ impl InMemoryAccountsService {
 
 #[async_trait]
 impl AccountsApi for InMemoryAccountsService {
-    async fn create_account(&mut self, description: &str) -> Result<AccountId> {
+    async fn create_account(&mut self, description: &str) -> Result<CreateAccountResponse> {
         let id = Uuid::new_v4();
         let account = Account {
             id,
@@ -32,7 +34,7 @@ impl AccountsApi for InMemoryAccountsService {
             points: 0,
         };
         self.accounts.insert(id, account);
-        Ok(id)
+        Ok(CreateAccountResponse { id })
     }
 
     async fn get_balance(&mut self, account_id: &AccountId) -> Result<GetBalanceResult> {
@@ -68,7 +70,7 @@ impl AccountsApi for InMemoryAccountsService {
 
 #[async_trait]
 impl AccountsApi for SqlAccountsService {
-    async fn create_account(&mut self, description: &str) -> Result<AccountId> {
+    async fn create_account(&mut self, description: &str) -> Result<CreateAccountResponse> {
         let id = Uuid::new_v4();
 
         let option: Option<PgRow> = sqlx::query(
@@ -84,7 +86,7 @@ VALUES ($1, $2, $3);
         .await?;
         assert!(option.is_none());
 
-        Ok(id)
+        Ok(CreateAccountResponse { id })
     }
 
     async fn get_balance(&mut self, account_id: &AccountId) -> Result<GetBalanceResult> {
@@ -107,7 +109,7 @@ VALUES ($1, $2, $3);
     }
 
     async fn deposit(&mut self, account_id: &AccountId, amount: u32) -> Result<DepositResult> {
-        let amount : i32 = amount.try_into()?;
+        let amount: i32 = amount.try_into()?;
         let result = sqlx::query(
             r#"
         UPDATE Accounts
@@ -123,15 +125,19 @@ VALUES ($1, $2, $3);
         // TODO: transaction
         if result.rows_affected() == 1 {
             Ok(match self.get_balance(account_id).await? {
-                GetBalanceResult::Ok(ok) => { DepositResult::Ok(ok) }
-                GetBalanceResult::AccountNotFound(act) => { DepositResult::AccountNotFound(act) }
+                GetBalanceResult::Ok(ok) => DepositResult::Ok(ok),
+                GetBalanceResult::AccountNotFound(act) => DepositResult::AccountNotFound(act),
             })
         } else {
             Ok(DepositResult::AccountNotFound(account_id.clone()))
         }
     }
 
-    async fn withdraw(&mut self, account_id: &AccountId, amount: u32) -> anyhow::Result<WithdrawResult> {
+    async fn withdraw(
+        &mut self,
+        account_id: &AccountId,
+        amount: u32,
+    ) -> Result<WithdrawResult> {
         // TODO: transaction
 
         let result = sqlx::query(
@@ -154,7 +160,7 @@ VALUES ($1, $2, $3);
         };
 
         if result.rows_affected() == 0 {
-            return Ok(WithdrawResult::NotEnoughBalance(balance))
+            return Ok(WithdrawResult::NotEnoughBalance(balance));
         }
         if result.rows_affected() == 1 {
             return Ok(WithdrawResult::Ok(balance));
@@ -213,7 +219,7 @@ pub mod tests {
     }
 
     pub async fn test_svc<T: AccountsApi + ?Sized>(svc: &mut T) -> Result<()> {
-        let acct = svc.create_account("Some desc").await?;
+        let acct = svc.create_account("Some desc").await?.id;
         let res = svc.get_balance(&acct).await?;
         assert_eq!(res, GetBalanceResult::Ok(0));
 

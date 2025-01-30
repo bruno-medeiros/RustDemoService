@@ -2,7 +2,6 @@ use anyhow::Result;
 use rust_demo_app::accounts;
 use rust_demo_app::accounts::service::SqlAccountsService;
 use rust_demo_app::accounts::webapp;
-use rust_demo_app::accounts::webapp::CreateAccountResponse;
 use rust_demo_app::accounts::webclient::AccountsServiceClient;
 use rust_demo_app::app_util::{AppControl, AppStarter};
 use rust_demo_commons::test_commons;
@@ -10,6 +9,7 @@ use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tracing::info;
+use rust_demo_app::accounts::api::CreateAccountResponse;
 
 #[tokio::test]
 async fn accounts_it() -> Result<()> {
