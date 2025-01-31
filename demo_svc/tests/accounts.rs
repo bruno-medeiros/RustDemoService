@@ -1,5 +1,6 @@
 use anyhow::Result;
 use rust_demo_app::accounts;
+use rust_demo_app::accounts::api::CreateAccountResponse;
 use rust_demo_app::accounts::service::SqlAccountsService;
 use rust_demo_app::accounts::webapp;
 use rust_demo_app::accounts::webclient::AccountsServiceClient;
@@ -9,7 +10,6 @@ use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tracing::info;
-use rust_demo_app::accounts::api::CreateAccountResponse;
 
 #[tokio::test]
 async fn accounts_it() -> Result<()> {
@@ -72,5 +72,20 @@ async fn test_websvc_direct(addr: SocketAddr) -> Result<()> {
     assert_eq!(res.status(), reqwest::StatusCode::CREATED);
     let body = res.text().await?;
     let _res: CreateAccountResponse = serde_json::from_str(&body)?;
+
+    let res = reqwest::Client::new()
+        .post(format!("http://{addr}/accounts/"))
+        .header(reqwest::header::CONTENT_TYPE, "application/json")
+        .body(
+            r#"{
+            "description" : "!!!RETURN_INTERNAL_ERROR"
+        }"#,
+        )
+        .send()
+        .await?;
+
+    assert_eq!(res.status(), reqwest::StatusCode::INTERNAL_SERVER_ERROR);
+    let body = res.text().await?;
+    assert_eq!(body, "An internal error occurred: Instrumented Internal Server Error");
     Ok(())
 }

@@ -1,9 +1,11 @@
 use crate::accounts::api::{AccountsApi, CreateAccountParams, DepositParams, WithdrawParams};
 use crate::accounts::service::SqlAccountsService;
+use crate::app_util::{to_response, to_response_with_ok_status};
 use crate::AppState;
+use anyhow::anyhow;
 use axum::extract::State;
 use axum::http::StatusCode;
-use axum::response::{IntoResponse, Response};
+use axum::response::Response;
 use axum::routing::post;
 use axum::{Json, Router};
 use sqlx::postgres::PgPoolOptions;
@@ -12,22 +14,21 @@ use tokio::sync::Mutex;
 use tracing::info;
 use tx_model::AccountId;
 
-
 pub async fn create_account(
     State(state): State<Arc<AppState>>,
     Json(payload): Json<CreateAccountParams>,
 ) -> Response {
     let mut accounts = state.accounts.lock().await;
 
-    let result = accounts.create_account(&payload.description).await;
-    match result {
-        Ok(response) => {
-            (StatusCode::CREATED, Json(response)).into_response()
-        }
-        Err(err) => {
-            (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response()
-        }
+    #[cfg(feature = "test-utils")]
+    if payload.description.contains("!!!RETURN_INTERNAL_ERROR") {
+        return to_response::<()>(Err(anyhow!("Instrumented Internal Server Error")));
     }
+
+    to_response_with_ok_status(
+        StatusCode::CREATED,
+        accounts.create_account(&payload.description).await,
+    )
 }
 
 pub async fn get_balance(
@@ -36,17 +37,8 @@ pub async fn get_balance(
 ) -> Response {
     let mut accounts = state.accounts.lock().await;
 
-    let result = accounts.get_balance(&params).await;
-    match result {
-        Ok(response) => {
-            (StatusCode::OK, Json(response)).into_response()
-        }
-        Err(err) => {
-            (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response()
-        }
-    }
+    to_response(accounts.get_balance(&params).await)
 }
-
 
 pub async fn deposit(
     State(state): State<Arc<AppState>>,
@@ -54,16 +46,7 @@ pub async fn deposit(
 ) -> Response {
     let mut accounts = state.accounts.lock().await;
 
-    let result = accounts.deposit(&params.account_id, params.amount).await;
-
-    match result {
-        Ok(response) => {
-            (StatusCode::OK, Json(response)).into_response()
-        }
-        Err(err) => {
-            (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response()
-        }
-    }
+    to_response(accounts.deposit(&params.account_id, params.amount).await)
 }
 
 pub async fn withdraw(
@@ -72,16 +55,7 @@ pub async fn withdraw(
 ) -> Response {
     let mut accounts = state.accounts.lock().await;
 
-    let result = accounts.withdraw(&params.account_id, params.amount).await;
-
-    match result {
-        Ok(response) => {
-            (StatusCode::OK, Json(response)).into_response()
-        }
-        Err(err) => {
-            (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response()
-        }
-    }
+    to_response(accounts.withdraw(&params.account_id, params.amount).await)
 }
 
 pub fn create_webapp(accounts: SqlAccountsService) -> Router {

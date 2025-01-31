@@ -1,6 +1,8 @@
 use anyhow::bail;
-use axum::Router;
+use axum::{Json, Router};
 use std::net::SocketAddr;
+use axum::http::StatusCode;
+use axum::response::{IntoResponse, Response};
 use tokio::sync::oneshot;
 use tokio::sync::oneshot::{Receiver, Sender};
 use tracing::info;
@@ -71,4 +73,44 @@ impl AppStarter {
 async fn shutdown_signal(receiver: Receiver<()>) {
     receiver.await.ok();
     info!("Shutdown signal received");
+}
+
+// --- Error handling utilities.
+// There's currently two approaches, using to_response inside Strum handler
+// or returning InternalError
+pub fn to_response<T: serde::Serialize>(result: anyhow::Result<T>) -> Response {
+    to_response_with_ok_status(StatusCode::OK, result)
+}
+
+pub fn to_response_with_ok_status<T: serde::Serialize>(
+    code: StatusCode,
+    result: anyhow::Result<T>,
+) -> Response {
+    match result {
+        Ok(ok) => (code, Json(ok)).into_response(),
+        Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, InternalError::from(err)).into_response(),
+    }
+}
+
+pub struct InternalError(anyhow::Error);
+
+impl IntoResponse for InternalError {
+    fn into_response(self) -> Response {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("An internal error occurred: {}", self.0),
+        )
+            .into_response()
+    }
+}
+
+// This enables using `?` on functions that return `Result<_, anyhow::Error>` to turn them into
+// `Result<_, AppError>`. That way you don't need to do that manually.
+impl<E> From<E> for InternalError
+where
+    E: Into<anyhow::Error>,
+{
+    fn from(err: E) -> Self {
+        Self(err.into())
+    }
 }
