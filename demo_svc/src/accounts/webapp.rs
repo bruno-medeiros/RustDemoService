@@ -1,59 +1,34 @@
-use crate::accounts::api::{AccountsApi, DepositResult, GetBalanceResult, WithdrawResult};
+use crate::accounts::api::{AccountsApi, CreateAccountParams, DepositParams, WithdrawParams};
 use crate::accounts::service::SqlAccountsService;
+use crate::app_util::{to_response, to_response_with_ok_status};
 use crate::AppState;
+use anyhow::anyhow;
 use axum::extract::State;
 use axum::http::StatusCode;
-use axum::response::{IntoResponse, Response};
+use axum::response::Response;
 use axum::routing::post;
 use axum::{Json, Router};
-use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tracing::info;
 use tx_model::AccountId;
-use uuid::Uuid;
-
-// the input to our `create_user` handler
-#[derive(Deserialize)]
-pub struct CreateAccount {
-    description: String,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct CreateAccountResponse {
-    // #[serde(with = "uuid::serde::simple")]
-    id: Uuid,
-}
-
-#[derive(Deserialize)]
-pub struct DepositParams {
-    account_id: AccountId,
-    amount: u32,
-}
-
-#[derive(Deserialize)]
-pub struct WithdrawParams {
-    account_id: AccountId,
-    amount: u32,
-}
 
 pub async fn create_account(
     State(state): State<Arc<AppState>>,
-    Json(payload): Json<CreateAccount>,
+    Json(payload): Json<CreateAccountParams>,
 ) -> Response {
     let mut accounts = state.accounts.lock().await;
 
-    let result = accounts.create_account(&payload.description).await;
-    match result {
-        Ok(id) => {
-            let response = CreateAccountResponse { id };
-            (StatusCode::CREATED, Json(response)).into_response()
-        }
-        Err(err) => {
-            (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response()
-        }
+    #[cfg(feature = "test-utils")]
+    if payload.description.contains("!!!RETURN_INTERNAL_ERROR") {
+        return to_response::<()>(Err(anyhow!("Instrumented Internal Server Error")));
     }
+
+    to_response_with_ok_status(
+        StatusCode::CREATED,
+        accounts.create_account(&payload.description).await,
+    )
 }
 
 pub async fn get_balance(
@@ -62,20 +37,8 @@ pub async fn get_balance(
 ) -> Response {
     let mut accounts = state.accounts.lock().await;
 
-    let result = accounts.get_balance(&params).await;
-    match result {
-        Ok(GetBalanceResult::Ok(balance)) => {
-            (StatusCode::OK, Json(balance)).into_response()
-        }
-        Ok(GetBalanceResult::AccountNotFound(account_id)) => {
-            (StatusCode::NOT_FOUND, Json(account_id)).into_response()
-        }
-        Err(err) => {
-            (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response()
-        }
-    }
+    to_response(accounts.get_balance(&params).await)
 }
-
 
 pub async fn deposit(
     State(state): State<Arc<AppState>>,
@@ -83,19 +46,7 @@ pub async fn deposit(
 ) -> Response {
     let mut accounts = state.accounts.lock().await;
 
-    let result = accounts.deposit(&params.account_id, params.amount).await;
-
-    match result {
-        Ok(DepositResult::Ok(balance)) => {
-            (StatusCode::OK, Json(balance)).into_response()
-        }
-        Ok(DepositResult::AccountNotFound(account_id)) => {
-            (StatusCode::NOT_FOUND, Json(account_id)).into_response()
-        }
-        Err(err) => {
-            (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response()
-        }
-    }
+    to_response(accounts.deposit(&params.account_id, params.amount).await)
 }
 
 pub async fn withdraw(
@@ -104,22 +55,7 @@ pub async fn withdraw(
 ) -> Response {
     let mut accounts = state.accounts.lock().await;
 
-    let result = accounts.withdraw(&params.account_id, params.amount).await;
-
-    match result {
-        Ok(WithdrawResult::Ok(balance)) => {
-            (StatusCode::OK, Json(balance)).into_response()
-        }
-        Ok(WithdrawResult::AccountNotFound(account_id)) => {
-            (StatusCode::NOT_FOUND, Json(account_id)).into_response()
-        }
-        Ok(WithdrawResult::NotEnoughBalance(balance)) => {
-            (StatusCode::BAD_REQUEST, format!("Not enough balance: {balance}")).into_response()
-        }
-        Err(err) => {
-            (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response()
-        }
-    }
+    to_response(accounts.withdraw(&params.account_id, params.amount).await)
 }
 
 pub fn create_webapp(accounts: SqlAccountsService) -> Router {
@@ -127,7 +63,7 @@ pub fn create_webapp(accounts: SqlAccountsService) -> Router {
         accounts: Arc::new(Mutex::new(accounts)),
     });
     let app = Router::new()
-        .route("/accounts", post(create_account))
+        .route("/accounts/", post(create_account))
         .route("/accounts/get_balance", post(get_balance))
         .route("/accounts/deposit", post(deposit))
         .route("/accounts/withdraw", post(withdraw))

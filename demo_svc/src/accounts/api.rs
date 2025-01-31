@@ -1,21 +1,44 @@
 use async_trait::async_trait;
 use std::todo;
+use serde::{Deserialize, Serialize};
 use tx_model::{AccountId, Balance};
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CreateAccountParams {
+    pub description: String,
+}
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CreateAccountResponse {
+    // #[serde(with = "uuid::serde::simple")]
+    pub id: AccountId,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct DepositParams {
+    pub account_id: AccountId,
+    pub amount: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum GetBalanceResult {
     Ok(Balance),
     AccountNotFound(AccountId),
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum DepositResult {
     Ok(Balance),
     AccountNotFound(AccountId),
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct WithdrawParams {
+    pub account_id: AccountId,
+    pub amount: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum WithdrawResult {
     Ok(Balance),
     AccountNotFound(AccountId),
@@ -28,7 +51,7 @@ pub enum WithdrawResult {
 #[async_trait]
 pub trait AccountsApi {
 
-    async fn create_account(&mut self, description: &str) -> anyhow::Result<AccountId>;
+    async fn create_account(&mut self, description: &str) -> anyhow::Result<CreateAccountResponse>;
 
     async fn get_balance(&mut self, account_id: &AccountId) -> anyhow::Result<GetBalanceResult>;
 

@@ -1,6 +1,8 @@
 mod error_handling;
-mod lifetimes;
 mod json;
+mod lifetimes;
+mod uri;
+
 
 mod equality {
     //noinspection RsAssertEqual
@@ -13,5 +15,4 @@ mod equality {
         let foo: Option<&String> = foo.as_ref();
         assert!(foo.map(String::as_str) == Some("foo"));
     }
-
 }
