@@ -182,8 +182,12 @@ impl SqlAccountsService {
 
         info!("Initializing Accounts Table");
 
-        let option: Option<PgRow> = sqlx::query(
-            r#"
+        let option: Option<PgRow>;
+
+        let mut retries = 0;
+        loop {
+            let create_res = sqlx::query(
+                r#"
 CREATE TABLE IF NOT EXISTS Accounts
 (
     id          UUID PRIMARY KEY,
@@ -191,9 +195,16 @@ CREATE TABLE IF NOT EXISTS Accounts
     balance     INT NOT NULL DEFAULT 0
 );
 "#,
-        )
-        .fetch_optional(pool.as_ref())
-        .await?;
+            )
+                .fetch_optional(pool.as_ref())
+                .await;
+            if create_res.is_err() && retries < 3 {
+                retries +=1;
+                continue;
+            }
+            option = create_res?;
+            break;
+        }
 
         if option.is_some() {
             bail!("expected 0 rows during create")

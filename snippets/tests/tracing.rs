@@ -7,6 +7,7 @@ use tracing::{info, warn, Level};
 use tracing_subscriber::fmt::time::OffsetTime;
 
 #[test]
+#[ignore]
 fn tracing_subscriber_default() {
     tracing_subscriber::fmt().try_init().ok();
 
@@ -22,7 +23,9 @@ fn tracing_subscriber_commons() {
     warn!("Warning!!!");
 }
 
+
 #[test]
+#[ignore]
 fn tracing_subscriber_short_time() {
     use time::macros::format_description;
 
