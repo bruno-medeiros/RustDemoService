@@ -18,5 +18,9 @@ jobs:
     - uses: actions/checkout@v4
     - name: Build
       run: cargo build --verbose
+    - name: Setup containers for tests
+      run: docker-compose -f docker-compose.yml up -d
     - name: Run tests
+      env:
+        DATABASE_URL: "postgres://postgres:example@127.0.0.1:5432/postgres"
       run: cargo test --verbose
