@@ -17,4 +17,5 @@ jobs:
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - run: docker --version
+      - run: docker compose --help
       - run: docker-compose --version
