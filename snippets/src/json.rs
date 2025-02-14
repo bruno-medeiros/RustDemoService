@@ -36,19 +36,25 @@ mod tests {
         }"#;
 
     #[test]
-    fn compare_json_value() -> Result<()> {
+    #[ignore] // Uncomment to view assert error message
+    fn compare_json_value_neq() -> Result<()> {
         let v1: Value = serde_json::from_str(DATA)?;
         let v2: Value = serde_json::from_str(DATA2)?;
         assert_eq!(v1, v2);
+        Ok(())
+    }
 
+    #[test]
+    fn compare_json_value() -> Result<()> {
+        let v1: Value = serde_json::from_str(DATA)?;
         let v3 = r#"
         {
             "age": 43,
             "phones": [
-                "+44 2345678"
                 "+44 1234567",
-            ]
-            "name": "John Doe",
+                "+44 2345678"
+            ],
+            "name": "John Doe"
         }"#;
         let v3: Value = serde_json::from_str(v3)?;
         assert_eq!(v1, v3);
@@ -56,6 +62,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore] // Uncomment to view assert error message
     fn compare_json_string() -> Result<()> {
         let v1: Value = serde_json::from_str(DATA)?;
         let v2: Value = serde_json::from_str(DATA2)?;
