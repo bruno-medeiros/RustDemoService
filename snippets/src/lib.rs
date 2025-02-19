@@ -1,7 +1,10 @@
 mod error_handling;
-mod json;
 mod lifetimes;
+mod trait_objects;
+
+mod json;
 mod uri;
+
 
 
 mod equality {
