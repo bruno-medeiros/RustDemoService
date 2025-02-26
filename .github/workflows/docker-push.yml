@@ -3,6 +3,7 @@ name: Docker
 on:
   workflow_run:
     workflows: [Build]
+    # TODO: completed
     types: [requested]
     branches: [master]
 
@@ -12,24 +13,13 @@ env:
 jobs:
   docker:
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
-      attestations: write
-      id-token: write
+#    permissions:
+#      packages: write
+#      contents: read
+#      attestations: write
+#      id-token: write
 
     steps:
-    - shell: bash
-      env:
-        SUPER_SECRET: ${{ vars.DOCKERHUB_USERNAME }}
-      run: |
-        echo "$SUPER_SECRET"
-    - shell: bash
-      env:
-        SUPER_SECRET2: ${{ secrets.DOCKERHUB_TOKEN }}
-      run: |
-        echo "$SUPER_SECRET2"
-
     - name: docker login
       uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
       with:
@@ -44,7 +34,7 @@ jobs:
 
     - name: Build and push Docker image
       id: push
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v6
       with:
         context: .
         file: ./Dockerfile
