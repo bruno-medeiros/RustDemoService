@@ -42,7 +42,6 @@ jobs:
 #        echo "----"
 #        ls .
     - name: docker login
-      if: github.event_name != 'pull_request'
       uses: docker/login-action@v3
       with:
         username: ${{ vars.DOCKERHUB_USERNAME }}
@@ -60,7 +59,7 @@ jobs:
       with:
 #        context: .
 #        file: ./Dockerfile
-        push: true
+        push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
 
