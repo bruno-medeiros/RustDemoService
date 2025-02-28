@@ -19,6 +19,11 @@ jobs:
 #      id-token: write
 
     steps:
+    - name: List files in the repository
+      run: |
+        ls ${{ github.workspace }} 
+        echo "----"
+        ls .
 #    - uses: actions/checkout@v4
     - name: docker login
       uses: docker/login-action@v3
