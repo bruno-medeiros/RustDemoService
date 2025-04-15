@@ -1,20 +1,24 @@
 use std::thread::scope;
-use tracing::Level;
+use tracing::{error, Level};
 
-fn main() -> anyhow::Result<()> {
+fn main() {
     tracing_subscriber::fmt()
         .with_max_level(Level::DEBUG)
         .init();
 
-    scope(|s| {
-        s.spawn(|| rust_demo_app::axum_example::svc_main(8082));
+    let _ = std::thread::spawn(|| rust_demo_app::axum_example::svc_main(8082));
 
-        let conn_url = std::env::var("DATABASE_URL")?;
+    if let Err(err) = main_inner() {
+      error!("App failure: {:?}", err);
+    }
+}
 
-        let rt = tokio::runtime::Builder::new_multi_thread()
-            .enable_all()
-            .build()?;
+fn main_inner() -> anyhow::Result<()> {
+    let conn_url = std::env::var("DATABASE_URL")?;
 
-        rt.block_on(rust_demo_app::svc_main(8085, conn_url))
-    })
+    let rt = tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()?;
+
+    rt.block_on(rust_demo_app::svc_main(8085, conn_url))
 }
