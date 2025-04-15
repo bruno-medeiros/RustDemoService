@@ -8,11 +8,11 @@ COPY .  .
 # RUN rustup target add x86_64-unknown-linux-musl
 # RUN cargo build --release --target=x86_64-unknown-linux-musl
 RUN cargo build --release --target=x86_64-unknown-linux-gnu
-RUN ls -l ./target/release/rust-demo-app
+RUN ls -l ./target/x86_64-unknown-linux-gnu/release/rust-demo-app
 
 FROM alpine:3.18
 
 WORKDIR /app
-COPY --from=build-env /src/target/release/rust-demo-app .
+COPY --from=build-env /src/target/x86_64-unknown-linux-gnu/release/rust-demo-app .
 
 CMD ["/app/rust-demo-app"]
