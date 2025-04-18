@@ -2,17 +2,22 @@
 FROM rust:1.83.0 AS build-env
 
 # Set the working directory inside the container
-WORKDIR /src
+WORKDIR /build/src
 COPY .  .
 
 # RUN rustup target add x86_64-unknown-linux-musl
 # RUN cargo build --release --target=x86_64-unknown-linux-musl
-RUN cargo build --release --target=x86_64-unknown-linux-gnu
-RUN ls -l ./target/x86_64-unknown-linux-gnu/release/rust-demo-app
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/build/src/target \
+    cargo build --release --target=x86_64-unknown-linux-gnu
+
+RUN --mount=type=cache,target=/build/src/target \
+    cp /build/src/target/x86_64-unknown-linux-gnu/release/rust-demo-app /build
+
 
 FROM alpine:3.18
 
 WORKDIR /app
-COPY --from=build-env /src/target/x86_64-unknown-linux-gnu/release/rust-demo-app .
+COPY --from=build-env /build/rust-demo-app .
 
 CMD ["/app/rust-demo-app"]
