@@ -2,10 +2,18 @@
 
 use std::error::Error;
 
+fn into_std_error() -> Result<(), Box<dyn Error>> {
+    let result: Result<(), Box<dyn Error>> = Err("xxx".into());
+    result?;
+
+    // alternative:
+    Err("xxx")?
+}
 use anyhow::anyhow;
 
+#[allow(unused_variables)]
 fn anyhow_error_conversion_fail() {
-    // let error: Box<dyn Error> = "xxx".to_string().into();
+    let error: Box<dyn Error> = "xxx".to_string().into();
     // let error2: anyhow::Error = error.into();
 }
 
@@ -23,7 +31,8 @@ fn anyhow_res(num: i8) -> anyhow::Result<()> {
         anyhow::bail!("foo");
     }
     if num < 0 {
-        Err(anyhow!("Num < 0: {}", num))?
+        let anyhow_err: Result<(), anyhow::Error> = Err(anyhow!("Num < 0: {}", num));
+        anyhow_err?
     }
     Ok(())
 }
