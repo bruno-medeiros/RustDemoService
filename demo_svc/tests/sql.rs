@@ -1,15 +1,14 @@
 use sqlx::ConnectOptions;
-use tokio_postgres::{Error, NoTls};
+use tokio_postgres::{NoTls};
+use anyhow::Result;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 10)]
-async fn tokio_postgres_example() -> Result<(), Error> {
+async fn tokio_postgres_example() -> Result<()> {
     test_commons::init_logging();
 
-    let pass = "example";
+    let conn_url = std::env::var("DATABASE_URL")?;
 
-    // Connect to the database.
-    let connect_str = format!("host=127.0.0.1 user=postgres password={} port=5432", pass);
-    let (client, connection) = tokio_postgres::connect(&connect_str, NoTls).await?;
+    let (client, connection) = tokio_postgres::connect(&conn_url, NoTls).await?;
 
     // The connection object performs the actual communication with the database,
     // so spawn it off to run on its own.
@@ -34,11 +33,10 @@ use rust_demo_commons::test_commons;
 
 // #[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 #[tokio::test]
-async fn sqlx_example() -> Result<(), sqlx::Error> {
+async fn sqlx_example() -> Result<()> {
     test_commons::init_logging();
 
-    let conn_url = std::env::var("DATABASE_URL")
-        .unwrap_or("postgres://postgres:example@localhost:5432/postgres".to_owned());
+    let conn_url = std::env::var("DATABASE_URL")?;
 
     println!("Creating connection pool");
     // Create a connection pool

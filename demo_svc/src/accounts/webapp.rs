@@ -2,7 +2,6 @@ use crate::accounts::api::{AccountsApi, CreateAccountParams, DepositParams, With
 use crate::accounts::service::SqlAccountsService;
 use crate::app_util::{to_response, to_response_with_ok_status};
 use crate::AppState;
-use anyhow::anyhow;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::Response;
@@ -22,7 +21,7 @@ pub async fn create_account(
 
     #[cfg(feature = "test-utils")]
     if payload.description.contains("!!!RETURN_INTERNAL_ERROR") {
-        return to_response::<()>(Err(anyhow!("Instrumented Internal Server Error")));
+        return to_response::<()>(Err(anyhow::anyhow!("Instrumented Internal Server Error")));
     }
 
     to_response_with_ok_status(
