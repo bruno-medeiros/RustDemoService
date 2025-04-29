@@ -20,7 +20,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata2:/var/lib/postgresql/data2
 
   adminer:
     image: adminer
@@ -29,5 +29,5 @@ services:
       - "9090:8080"
 
 volumes:
-  pgdata:
+  pgdata2:
     driver: local
