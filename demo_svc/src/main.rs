@@ -1,4 +1,3 @@
-use std::thread::scope;
 use tracing::{error, Level};
 
 fn main() {
