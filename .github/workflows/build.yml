@@ -22,11 +22,11 @@ jobs:
         ls ${{ github.workspace }} 
         echo "----"
         ls .
-    - name: Setup containers for tests
-      run: docker compose -f docker-compose.yml up -d
+#    - name: Setup containers for tests
+#      run: docker compose -f docker-compose.yml up -d
     - name: Run tests
-      env:
-        DATABASE_URL: "postgres://postgres:example@127.0.0.1:5432/postgres"
+#      env:
+#        DATABASE_URL: "postgres://postgres:mypassword@127.0.0.1:5432/postgres"
       run: cargo test --verbose
 
 #  docker:
