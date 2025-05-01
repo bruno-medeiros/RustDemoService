@@ -1,12 +1,12 @@
 #[cfg(any(feature = "test-utils"))]
 pub mod test_commons {
-    use tracing_subscriber::EnvFilter;
-
     use std::sync::Once;
+
     use time::macros::format_description;
     use time::UtcOffset;
     use tracing_subscriber::filter::LevelFilter;
     use tracing_subscriber::fmt::time::OffsetTime;
+    use tracing_subscriber::EnvFilter;
 
     static INIT: Once = Once::new();
 

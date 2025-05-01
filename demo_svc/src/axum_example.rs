@@ -1,7 +1,8 @@
-use axum::extract::{Query, State};
-use axum::{routing::get, Router};
 use std::collections::HashMap;
 use std::sync::Arc;
+
+use axum::extract::{Query, State};
+use axum::{routing::get, Router};
 use tracing::info;
 
 #[tokio::main]

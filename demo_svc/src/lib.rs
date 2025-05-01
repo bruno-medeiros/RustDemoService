@@ -2,11 +2,13 @@ pub mod accounts;
 pub mod app_util;
 pub mod axum_example;
 
+use std::sync::Arc;
+
+use accounts::webapp;
+use tokio::sync::Mutex;
+
 use crate::accounts::service::SqlAccountsService;
 use crate::app_util::AppStarter;
-use accounts::webapp;
-use std::sync::Arc;
-use tokio::sync::Mutex;
 
 #[derive(Clone)]
 pub struct AppState {

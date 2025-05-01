@@ -1,17 +1,19 @@
-use crate::accounts::api::{AccountsApi, CreateAccountParams, DepositParams, WithdrawParams};
-use crate::accounts::service::SqlAccountsService;
-use crate::app_util::{to_response, to_response_with_ok_status};
-use crate::AppState;
+use std::sync::Arc;
+
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::Response;
 use axum::routing::post;
 use axum::{Json, Router};
 use sqlx::postgres::PgPoolOptions;
-use std::sync::Arc;
 use tokio::sync::Mutex;
 use tracing::info;
 use tx_model::AccountId;
+
+use crate::accounts::api::{AccountsApi, CreateAccountParams, DepositParams, WithdrawParams};
+use crate::accounts::service::SqlAccountsService;
+use crate::app_util::{to_response, to_response_with_ok_status};
+use crate::AppState;
 
 pub async fn create_account(
     State(state): State<Arc<AppState>>,

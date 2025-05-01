@@ -1,15 +1,17 @@
-use crate::accounts::api::{
-    AccountsApi, CreateAccountParams, CreateAccountResponse, DepositParams, DepositResult,
-    GetBalanceResult, WithdrawParams, WithdrawResult,
-};
+use std::str::FromStr;
+
 use async_trait::async_trait;
 use axum::http::Uri;
 use reqwest::Client;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
-use std::str::FromStr;
 use tracing::debug;
 use tx_model::AccountId;
+
+use crate::accounts::api::{
+    AccountsApi, CreateAccountParams, CreateAccountResponse, DepositParams, DepositResult,
+    GetBalanceResult, WithdrawParams, WithdrawResult,
+};
 
 #[derive(Clone, Debug)]
 pub struct AccountsServiceClient {

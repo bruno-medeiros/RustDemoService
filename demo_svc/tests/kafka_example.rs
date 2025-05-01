@@ -1,11 +1,4 @@
-use rdkafka::message::{Header, Headers, OwnedHeaders};
-use rdkafka::producer::{FutureProducer, FutureRecord};
-use rdkafka::{ClientConfig, ClientContext, Message, TopicPartitionList};
-use rust_demo_commons::test_commons;
 use std::time::Duration;
-
-use rdkafka::util::get_rdkafka_version;
-use tracing::{debug, info, warn};
 
 use anyhow::{anyhow, Result};
 use rdkafka::config::RDKafkaLogLevel;
@@ -13,6 +6,12 @@ use rdkafka::consumer::{
     BaseConsumer, CommitMode, Consumer, ConsumerContext, Rebalance, StreamConsumer,
 };
 use rdkafka::error::KafkaResult;
+use rdkafka::message::{Header, Headers, OwnedHeaders};
+use rdkafka::producer::{FutureProducer, FutureRecord};
+use rdkafka::util::get_rdkafka_version;
+use rdkafka::{ClientConfig, ClientContext, Message, TopicPartitionList};
+use rust_demo_commons::test_commons;
+use tracing::{debug, info, warn};
 
 fn create_common_client_config(brokers: &str) -> ClientConfig {
     let mut config = ClientConfig::new();

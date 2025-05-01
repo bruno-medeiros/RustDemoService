@@ -1,7 +1,7 @@
+use std::sync::Once;
+
 use tracing::Level;
 use tracing_subscriber::EnvFilter;
-
-use std::sync::Once;
 
 static INIT: Once = Once::new();
 

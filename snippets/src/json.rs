@@ -10,10 +10,11 @@ pub struct ExampleDto {
 
 #[cfg(test)]
 mod tests {
-    use crate::json::ExampleDto;
     use anyhow::Result;
     use serde::Deserialize;
     use serde_json::Value;
+
+    use crate::json::ExampleDto;
 
     const DATA: &str = r#"
         {

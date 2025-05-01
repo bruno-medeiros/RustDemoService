@@ -1,15 +1,17 @@
-use crate::accounts::api::{
-    AccountsApi, CreateAccountResponse, DepositResult, GetBalanceResult, WithdrawResult,
-};
+use std::collections::HashMap;
+use std::sync::Arc;
+
 use anyhow::{bail, Result};
 use async_trait::async_trait;
 use sqlx::postgres::PgRow;
 use sqlx::{Pool, Postgres, Row};
-use std::collections::HashMap;
-use std::sync::Arc;
 use tracing::info;
 use tx_model::{Account, AccountId};
 use uuid::Uuid;
+
+use crate::accounts::api::{
+    AccountsApi, CreateAccountResponse, DepositResult, GetBalanceResult, WithdrawResult,
+};
 
 pub struct InMemoryAccountsService {
     accounts: HashMap<AccountId, Account>,

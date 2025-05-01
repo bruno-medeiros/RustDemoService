@@ -1,3 +1,6 @@
+use std::net::SocketAddr;
+use std::sync::Arc;
+
 use anyhow::Result;
 use rust_demo_app::accounts;
 use rust_demo_app::accounts::api::CreateAccountResponse;
@@ -7,8 +10,6 @@ use rust_demo_app::accounts::webclient::AccountsServiceClient;
 use rust_demo_app::app_util::{AppControl, AppStarter};
 use rust_demo_commons::test_commons;
 use sqlx::postgres::PgPoolOptions;
-use std::net::SocketAddr;
-use std::sync::Arc;
 use tracing::info;
 
 #[tokio::test]
