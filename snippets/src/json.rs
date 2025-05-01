@@ -10,10 +10,10 @@ pub struct ExampleDto {
 
 #[cfg(test)]
 mod tests {
+    use crate::json::ExampleDto;
     use anyhow::Result;
     use serde::Deserialize;
     use serde_json::Value;
-    use crate::json::ExampleDto;
 
     const DATA: &str = r#"
         {
@@ -70,8 +70,7 @@ mod tests {
         Ok(())
     }
 
-
-    fn deserialize<'de, T : Deserialize<'de>>(content: &'de str) -> Result<T> {
+    fn deserialize<'de, T: Deserialize<'de>>(content: &'de str) -> Result<T> {
         let v = serde_json::from_str::<T>(&content)?;
         Ok(v)
     }
@@ -87,5 +86,4 @@ mod tests {
         let result = deserialize::<ExampleDto>(&json).unwrap();
         assert_eq!(result.name, "John Doe");
     }
-
 }

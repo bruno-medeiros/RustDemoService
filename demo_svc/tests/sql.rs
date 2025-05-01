@@ -1,6 +1,6 @@
-use sqlx::ConnectOptions;
-use tokio_postgres::{NoTls};
 use anyhow::Result;
+use sqlx::ConnectOptions;
+use tokio_postgres::NoTls;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 async fn tokio_postgres_example() -> Result<()> {
@@ -28,8 +28,8 @@ async fn tokio_postgres_example() -> Result<()> {
     Ok(())
 }
 
-use sqlx::postgres::{PgConnectOptions, PgPoolOptions, PgRow};
 use rust_demo_commons::test_commons;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions, PgRow};
 
 // #[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 #[tokio::test]
@@ -42,8 +42,7 @@ async fn sqlx_example() -> Result<()> {
     // Create a connection pool
 
     let opt = conn_url
-        .parse::<PgConnectOptions>()
-        ?
+        .parse::<PgConnectOptions>()?
         .disable_statement_logging();
 
     let pool = PgPoolOptions::new()
@@ -75,7 +74,6 @@ CREATE TABLE IF NOT EXISTS AccountsTests
     .await?;
 
     assert!(option.is_none());
-
 
     let option: Option<PgRow> = sqlx::query(
         r#"

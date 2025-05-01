@@ -5,8 +5,6 @@ mod trait_objects;
 mod json;
 mod uri;
 
-
-
 mod equality {
     //noinspection RsAssertEqual
     #[test]

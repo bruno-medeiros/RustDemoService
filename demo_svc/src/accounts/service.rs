@@ -133,11 +133,7 @@ VALUES ($1, $2, $3);
         }
     }
 
-    async fn withdraw(
-        &mut self,
-        account_id: &AccountId,
-        amount: u32,
-    ) -> Result<WithdrawResult> {
+    async fn withdraw(&mut self, account_id: &AccountId, amount: u32) -> Result<WithdrawResult> {
         // TODO: transaction
 
         let result = sqlx::query(
@@ -196,10 +192,10 @@ CREATE TABLE IF NOT EXISTS Accounts
 );
 "#,
             )
-                .fetch_optional(pool.as_ref())
-                .await;
+            .fetch_optional(pool.as_ref())
+            .await;
             if create_res.is_err() && retries < 3 {
-                retries +=1;
+                retries += 1;
                 continue;
             }
             option = create_res?;

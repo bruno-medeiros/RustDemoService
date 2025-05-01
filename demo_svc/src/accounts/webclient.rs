@@ -1,4 +1,7 @@
-use crate::accounts::api::{AccountsApi, CreateAccountParams, CreateAccountResponse, DepositParams, DepositResult, GetBalanceResult, WithdrawParams, WithdrawResult};
+use crate::accounts::api::{
+    AccountsApi, CreateAccountParams, CreateAccountResponse, DepositParams, DepositResult,
+    GetBalanceResult, WithdrawParams, WithdrawResult,
+};
 use async_trait::async_trait;
 use axum::http::Uri;
 use reqwest::Client;
@@ -60,8 +63,7 @@ impl AccountsApi for AccountsServiceClient {
     }
 
     async fn get_balance(&mut self, account_id: &AccountId) -> anyhow::Result<GetBalanceResult> {
-        self
-            .send_request::<_, GetBalanceResult>("accounts/get_balance", &account_id)
+        self.send_request::<_, GetBalanceResult>("accounts/get_balance", &account_id)
             .await
     }
 

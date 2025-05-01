@@ -8,7 +8,7 @@ fn main() {
     let _ = std::thread::spawn(|| rust_demo_app::axum_example::svc_main(8082));
 
     if let Err(err) = main_inner() {
-      error!("App failure: {:?}", err);
+        error!("App failure: {:?}", err);
     }
 }
 

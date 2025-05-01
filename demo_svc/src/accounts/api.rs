@@ -1,6 +1,6 @@
 use async_trait::async_trait;
-use std::todo;
 use serde::{Deserialize, Serialize};
+use std::todo;
 use tx_model::{AccountId, Balance};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -45,26 +45,36 @@ pub enum WithdrawResult {
     NotEnoughBalance(Balance),
 }
 
-
 /// Alternative to `AccountsApi` using async-trait
 /// The main advantage is that it allows Box<dyn Trait> , ie it is object safe
 #[async_trait]
 pub trait AccountsApi {
-
     async fn create_account(&mut self, description: &str) -> anyhow::Result<CreateAccountResponse>;
 
     async fn get_balance(&mut self, account_id: &AccountId) -> anyhow::Result<GetBalanceResult>;
 
-    async fn deposit(&mut self, account_id: &AccountId, amount: u32) -> anyhow::Result<DepositResult>;
+    async fn deposit(
+        &mut self,
+        account_id: &AccountId,
+        amount: u32,
+    ) -> anyhow::Result<DepositResult>;
 
-    async fn withdraw(&mut self, account_id: &AccountId, amount: u32) -> anyhow::Result<WithdrawResult>;
+    async fn withdraw(
+        &mut self,
+        account_id: &AccountId,
+        amount: u32,
+    ) -> anyhow::Result<WithdrawResult>;
 
     #[allow(unused_variables)]
-    async fn transfer(&mut self, from: AccountId, balance: u32, to: AccountId) -> anyhow::Result<u32> {
+    async fn transfer(
+        &mut self,
+        from: AccountId,
+        balance: u32,
+        to: AccountId,
+    ) -> anyhow::Result<u32> {
         todo!()
     }
 }
-
 
 /// Upcoming version of the service API.
 /// Needs trait-variant to be able to make it object-safe
@@ -75,12 +85,19 @@ pub trait LocalAccountsApi2 {
 
     async fn get_balance(&mut self, account_id: AccountId) -> anyhow::Result<GetBalanceResult>;
 
-    async fn deposit(&mut self, account_id: AccountId, amount: u32) -> anyhow::Result<GetBalanceResult>;
+    async fn deposit(
+        &mut self,
+        account_id: AccountId,
+        amount: u32,
+    ) -> anyhow::Result<GetBalanceResult>;
 
-    async fn withdraw(&mut self, account_id: AccountId, amount: u32) -> anyhow::Result<WithdrawResult>;
+    async fn withdraw(
+        &mut self,
+        account_id: AccountId,
+        amount: u32,
+    ) -> anyhow::Result<WithdrawResult>;
 
     // #[allow(unused_variables)]
     // async fn transfer(&mut self, from: AccountId, balance: u32, to: AccountId) -> anyhow::Result<u32> {
     // }
 }
-

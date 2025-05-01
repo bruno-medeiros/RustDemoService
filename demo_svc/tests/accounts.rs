@@ -86,6 +86,9 @@ async fn test_websvc_direct(addr: SocketAddr) -> Result<()> {
 
     assert_eq!(res.status(), reqwest::StatusCode::INTERNAL_SERVER_ERROR);
     let body = res.text().await?;
-    assert_eq!(body, "An internal error occurred: Instrumented Internal Server Error");
+    assert_eq!(
+        body,
+        "An internal error occurred: Instrumented Internal Server Error"
+    );
     Ok(())
 }

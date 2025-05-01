@@ -19,8 +19,7 @@ fn create_common_client_config(brokers: &str) -> ClientConfig {
     config
         .set("bootstrap.servers", brokers)
         .set("debug", "broker,topic,msg")
-    .set_log_level(RDKafkaLogLevel::Debug)
-        ;
+        .set_log_level(RDKafkaLogLevel::Debug);
 
     config
 }
@@ -28,7 +27,7 @@ fn create_common_client_config(brokers: &str) -> ClientConfig {
 #[tokio::test]
 async fn kakfa_simple_example() -> Result<()> {
     test_commons::init_logging();
-    
+
     debug!("dummy");
 
     let (version_n, version_s) = get_rdkafka_version();

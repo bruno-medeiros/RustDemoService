@@ -45,7 +45,10 @@ fn test_recursive_mut() {
     // But then this doesn't work anymore:
     //x.push(3);
 }
-fn get_default2<'m, K: Eq + Hash + Clone, V: Default>(map: &'m mut HashMap<K, V>, key: K) -> &'m mut V {
+fn get_default2<'m, K: Eq + Hash + Clone, V: Default>(
+    map: &'m mut HashMap<K, V>,
+    key: K,
+) -> &'m mut V {
     if map.contains_key(&key) {
         // ^~~~~~~~~~~~~~~~~~ 'n
         return match map.get_mut(&key) {
