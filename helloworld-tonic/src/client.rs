@@ -1,7 +1,8 @@
-use crate::hello_world::HelloReply;
 use hello_world::greeter_client::GreeterClient;
 use hello_world::HelloRequest;
 use tonic::Response;
+
+use crate::hello_world::HelloReply;
 
 pub mod hello_world {
     tonic::include_proto!("helloworld");
