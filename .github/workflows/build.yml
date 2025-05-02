@@ -14,20 +14,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build
-      run: cargo build --verbose
-    - name: List files in the repository
-      run: |
-        ls ${{ github.workspace }} 
-        echo "----"
-        ls .
-#    - name: Setup containers for tests
-#      run: docker compose -f docker-compose.yml up -d
-    - name: Run tests
-#      env:
-#        DATABASE_URL: "postgres://postgres:mypassword@127.0.0.1:5432/postgres"
-      run: cargo test --verbose
+      - uses: actions/checkout@v4
+      - name: Build
+        run: cargo build --verbose
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }} 
+          echo "----"
+          ls .
+      - name: Setup containers for tests
+        run: docker compose -f docker-compose.yml up -d
+      - name: Run tests
+        env:
+          DATABASE_URL: "postgres://postgres:mypassword@127.0.0.1:5432/postgres"
+        run: cargo test --verbose
 
 #  docker:
 #    name: Build-Push Docker
@@ -41,26 +41,27 @@ jobs:
 #        ls ${{ github.workspace }}
 #        echo "----"
 #        ls .
-    - name: docker login
-      uses: docker/login-action@v3
-      with:
-        username: ${{ vars.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Extract metadata (tags, labels) for Docker
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: bdom/rust-demo-service-temp
+      - name: docker login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build and push Docker image
-      id: push
-      uses: docker/build-push-action@v6
-      with:
-#        context: .
-#        file: ./Dockerfile
-        push: ${{ github.event_name != 'pull_request' }}
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: bdom/rust-demo-service-temp
+
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          #        context: .
+          #        file: ./Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
 
