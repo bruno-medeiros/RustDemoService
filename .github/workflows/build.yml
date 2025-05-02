@@ -24,6 +24,8 @@ jobs:
           ls .
       - name: Setup containers for tests
         run: docker compose -f docker-compose.yml up -d
+      - name: Install non-Cargo deps
+        run: apt install -y cmake protobuf-compiler
       - name: Run tests
         env:
           DATABASE_URL: "postgres://postgres:mypassword@127.0.0.1:5432/postgres"
