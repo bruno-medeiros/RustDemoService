@@ -3,11 +3,11 @@ FROM rust:1.83.0 AS build-env
 
 WORKDIR /build/src
 
-RUN apt update
+RUN apt-get update
 # cmake for rdkafka and probably other stuff
 RUN apt-get install -y cmake
 # For protoc
-RUN apt install -y protobuf-compiler
+RUN apt-get install -y protobuf-compiler
 
 # Cargo build
 COPY .  .
