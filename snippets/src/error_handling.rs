@@ -42,3 +42,25 @@ pub fn unwrap_without_panic<T>(x: Result<T, Infallible>) -> T {
     let Ok(x) = x; // the `Err` case does not need to appear
     x
 }
+
+#[cfg(test)]
+mod tests {
+    use anyhow::{bail, Context};
+
+    #[test]
+    fn anyhow_display() {
+        let result = foo().context("Error doing context").context("Other ctx");
+
+        if let Err(err) = result {
+            println!("Err1: {err}");
+            println!("Err2: {err:#}");
+            println!("Err2: {err:?}");
+        }
+    }
+
+    fn foo() -> anyhow::Result<()> {
+        std::fs::read_to_string("message.txt")?;
+
+        bail!("Inner Error")
+    }
+}
