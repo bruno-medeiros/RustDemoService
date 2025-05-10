@@ -72,7 +72,7 @@ mod tests {
     }
 
     fn deserialize<'de, T: Deserialize<'de>>(content: &'de str) -> Result<T> {
-        let v = serde_json::from_str::<T>(&content)?;
+        let v = serde_json::from_str::<T>(content)?;
         Ok(v)
     }
 
@@ -84,7 +84,7 @@ mod tests {
             "name": "John Doe"
         }"#;
 
-        let result = deserialize::<ExampleDto>(&json).unwrap();
+        let result = deserialize::<ExampleDto>(json).unwrap();
         assert_eq!(result.name, "John Doe");
     }
 }

@@ -212,7 +212,7 @@ pub mod tests {
 
     #[tokio::test]
     async fn core_logic() -> Result<()> {
-        let svc = InMemoryAccountsService::new();
+        let svc = InMemoryAccountsService::default();
         // Make sure we can turn it into trait object:
         let mut svc: Box<dyn AccountsApi> = Box::new(svc);
         test_svc(svc.as_mut()).await?;

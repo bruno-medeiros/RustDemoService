@@ -36,15 +36,15 @@ async fn kakfa_simple_example() -> Result<()> {
     let brokers = "127.0.0.1:9092";
     let topic_name = "test";
 
-    produce_events(&brokers, topic_name, 5).await?;
+    produce_events(brokers, topic_name, 5).await?;
 
-    consume_and_print(&brokers, "test-consumerB", &vec![topic_name]).await;
+    consume_and_print(brokers, "test-consumerB", &[topic_name]).await;
 
     Ok(())
 }
 
 async fn produce_events(brokers: &str, topic_name: &str, amount: i32) -> Result<()> {
-    let producer: &FutureProducer = &create_common_client_config(&brokers)
+    let producer: &FutureProducer = &create_common_client_config(brokers)
         .set("message.timeout.ms", "5000")
         .set_log_level(RDKafkaLogLevel::Debug)
         .create()?;
@@ -113,7 +113,7 @@ async fn consume_and_print(brokers: &str, group_id: &str, topics: &[&str]) {
     info!("=== Subscribing to events...");
 
     consumer
-        .subscribe(&topics.to_vec())
+        .subscribe(topics)
         .expect("Can't subscribe to specified topics");
 
     let mut msg_count = 0;

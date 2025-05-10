@@ -41,8 +41,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
     fn hello_test() {}
 }
