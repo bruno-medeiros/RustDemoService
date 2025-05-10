@@ -25,7 +25,7 @@ impl AppControl {
         shutdown_signal: Sender<()>,
         terminated_latch: Receiver<()>,
     ) -> anyhow::Result<()> {
-        if let Err(_) = shutdown_signal.send(()) {
+        if shutdown_signal.send(()).is_err() {
             bail!("Couldn't send shutdown signal");
         }
         terminated_latch.await?;

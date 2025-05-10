@@ -1,3 +1,5 @@
+#![allow(clippy::disallowed_names)]
+
 mod error_handling;
 mod lifetimes;
 mod trait_objects;

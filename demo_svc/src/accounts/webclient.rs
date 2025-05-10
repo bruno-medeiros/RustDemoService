@@ -75,7 +75,7 @@ impl AccountsApi for AccountsServiceClient {
         amount: u32,
     ) -> anyhow::Result<DepositResult> {
         let params = DepositParams {
-            account_id: account_id.clone(),
+            account_id: *account_id,
             amount,
         };
         self.send_request("accounts/deposit", &params).await
@@ -87,7 +87,7 @@ impl AccountsApi for AccountsServiceClient {
         amount: u32,
     ) -> anyhow::Result<WithdrawResult> {
         let params = WithdrawParams {
-            account_id: account_id.clone(),
+            account_id: *account_id,
             amount,
         };
         self.send_request("accounts/withdraw", &params).await

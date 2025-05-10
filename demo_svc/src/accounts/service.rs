@@ -13,16 +13,9 @@ use crate::accounts::api::{
     AccountsApi, CreateAccountResponse, DepositResult, GetBalanceResult, WithdrawResult,
 };
 
+#[derive(Default)]
 pub struct InMemoryAccountsService {
     accounts: HashMap<AccountId, Account>,
-}
-
-impl InMemoryAccountsService {
-    pub fn new() -> Self {
-        InMemoryAccountsService {
-            accounts: HashMap::new(),
-        }
-    }
 }
 
 #[async_trait]
@@ -40,15 +33,15 @@ impl AccountsApi for InMemoryAccountsService {
     }
 
     async fn get_balance(&mut self, account_id: &AccountId) -> Result<GetBalanceResult> {
-        match self.accounts.get(&account_id) {
-            None => Ok(GetBalanceResult::AccountNotFound(account_id.clone())),
+        match self.accounts.get(account_id) {
+            None => Ok(GetBalanceResult::AccountNotFound(*account_id)),
             Some(account) => Ok(GetBalanceResult::Ok(account.balance)),
         }
     }
 
     async fn deposit(&mut self, account_id: &AccountId, amount: u32) -> Result<DepositResult> {
-        match self.accounts.get_mut(&account_id) {
-            None => Ok(DepositResult::AccountNotFound(account_id.clone())),
+        match self.accounts.get_mut(account_id) {
+            None => Ok(DepositResult::AccountNotFound(*account_id)),
             Some(account) => {
                 account.balance += amount;
                 Ok(DepositResult::Ok(account.balance))
@@ -57,8 +50,8 @@ impl AccountsApi for InMemoryAccountsService {
     }
 
     async fn withdraw(&mut self, account_id: &AccountId, amount: u32) -> Result<WithdrawResult> {
-        match self.accounts.get_mut(&account_id) {
-            None => Ok(WithdrawResult::AccountNotFound(account_id.clone())),
+        match self.accounts.get_mut(account_id) {
+            None => Ok(WithdrawResult::AccountNotFound(*account_id)),
             Some(account) => {
                 if account.balance < amount {
                     return Ok(WithdrawResult::NotEnoughBalance(account.balance));
@@ -105,7 +98,7 @@ VALUES ($1, $2, $3);
         .await?;
 
         Ok(match query_result {
-            None => GetBalanceResult::AccountNotFound(account_id.clone()),
+            None => GetBalanceResult::AccountNotFound(*account_id),
             Some(balance) => GetBalanceResult::Ok(balance.try_into()?),
         })
     }
@@ -131,7 +124,7 @@ VALUES ($1, $2, $3);
                 GetBalanceResult::AccountNotFound(act) => DepositResult::AccountNotFound(act),
             })
         } else {
-            Ok(DepositResult::AccountNotFound(account_id.clone()))
+            Ok(DepositResult::AccountNotFound(*account_id))
         }
     }
 
@@ -150,7 +143,7 @@ VALUES ($1, $2, $3);
         .execute(self.pool.as_ref())
         .await?;
 
-        let balance = match self.get_balance(&account_id).await? {
+        let balance = match self.get_balance(account_id).await? {
             GetBalanceResult::Ok(balance) => balance,
             GetBalanceResult::AccountNotFound(id) => {
                 return Ok(WithdrawResult::AccountNotFound(id))

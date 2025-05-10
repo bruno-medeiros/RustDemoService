@@ -10,5 +10,5 @@ Learning project for creating a web-service using Rust ecosystem, as well as set
 * Building project:
     * Run `docker compose -f docker-compose.yml up -d` to start dependencies for integration tests.
 
-* Code Style: Run `cargo +nightly fmt -- --config-path=.rustfmt.nightly.toml`
+* Code Style: Run `cargo +nightly fmt -- --config-path=.rustfmt.toml`
     * (Ideally configure this in the IDE to run on save or on commit)

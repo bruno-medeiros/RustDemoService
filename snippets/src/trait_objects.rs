@@ -17,7 +17,6 @@ impl FooTrait for MyFoo {
 }
 
 #[allow(dead_code)]
-
 pub fn test_trait() {
     let my_foo = MyFoo {
         name: "Joe".to_string(),

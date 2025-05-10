@@ -19,11 +19,8 @@ jobs:
         run: sudo apt-get install -y cmake protobuf-compiler
       - name: Build
         run: cargo build --verbose
-      - name: List files in the repository
-        run: |
-          ls ${{ github.workspace }} 
-          echo "----"
-          ls .
+      - name: Lint
+        run: cargo clippy --all-targets -- --deny warnings
       - name: Setup containers for tests
         run: docker compose -f docker-compose.yml up -d
       - name: Run tests

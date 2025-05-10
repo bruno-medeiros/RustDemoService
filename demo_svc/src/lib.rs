@@ -1,3 +1,5 @@
+#![warn(rust_2018_idioms)]
+
 pub mod accounts;
 pub mod app_util;
 pub mod axum_example;
