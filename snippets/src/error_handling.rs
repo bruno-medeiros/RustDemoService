@@ -45,11 +45,11 @@ pub fn unwrap_without_panic<T>(x: Result<T, Infallible>) -> T {
 
 #[cfg(test)]
 mod tests {
-    use anyhow::{bail, Context};
+    use anyhow::{anyhow, bail, Context};
 
     #[test]
     fn anyhow_display() {
-        let result = foo().context("Error doing context").context("Other ctx");
+        let result = foo().context("Error doing context").context("Outer ctx");
 
         if let Err(err) = result {
             println!("Err1: {err}");
@@ -62,5 +62,18 @@ mod tests {
         std::fs::read_to_string("message.txt")?;
 
         bail!("Inner Error")
+    }
+
+    #[test]
+    fn anyhow_display2() {
+        let err = anyhow!("Error1");
+        let err2 = anyhow!("Error2");
+
+        let err = err.context(err2);
+        // .context("Error doing context").context("Other ctx");
+
+        println!("Err1: {err}");
+        println!("Err2: {err:#}");
+        println!("Err2: {err:?}");
     }
 }
