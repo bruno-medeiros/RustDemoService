@@ -38,6 +38,8 @@ fn anyhow_res(num: i8) -> anyhow::Result<()> {
 }
 
 use std::convert::Infallible;
+use thiserror::Error;
+
 pub fn unwrap_without_panic<T>(x: Result<T, Infallible>) -> T {
     let Ok(x) = x; // the `Err` case does not need to appear
     x
@@ -74,6 +76,71 @@ mod tests {
 
         println!("Err1: {err}");
         println!("Err2: {err:#}");
-        println!("Err2: {err:?}");
+        println!("Err3: {err:?}");
+    }
+}
+
+#[derive(Debug, Error)]
+pub enum HttpClientError {
+    #[error("HTTP transport error: {0} -- {0:#} -- {0:?}")]
+    Transport(#[from] reqwest::Error),
+
+    #[error("Step '{step_name}' execution failed for workflow run. {source}")]
+    StepExecutionFailed {
+        step_name: String,
+        #[source]
+        source: anyhow::Error,
+    },
+}
+
+mod test2 {
+    use std::error::Error;
+
+    use crate::error_handling::HttpClientError;
+
+    #[tokio::test]
+    async fn test_display_of_structured_error() {
+        reqwest::get("http://asfasfasdfsadfasdfs:123")
+            .await
+            .map_err(|err| {
+                println!("Err1: {err}");
+                println!("Err2: {err:#}");
+                println!("Err3: {err:?}");
+
+                if let Some(source_err) = err.source() {
+                    println!(" Source1: {:?}", source_err);
+                }
+            })
+            .ok();
+
+        foo()
+            .await
+            .map_err(|err| {
+                println!("Err1: {err}");
+                println!("Err2: {err:#}");
+                println!("Err3: {err:?}");
+            })
+            .ok();
+    }
+
+    pub async fn foo() -> Result<(), HttpClientError> {
+        reqwest::get("http://asfasfasdfsadfasdfs:123").await?;
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_display_of_structured_error2() {
+        foo()
+            .await
+            .map_err(|err| {
+                let err = HttpClientError::StepExecutionFailed {
+                    step_name: "Step".into(),
+                    source: err.into(),
+                };
+                println!("Err1: {err}");
+                println!("Err2: {err:#}");
+                println!("Err3: {err:?}");
+            })
+            .ok();
     }
 }
