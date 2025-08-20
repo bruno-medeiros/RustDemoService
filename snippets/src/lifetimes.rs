@@ -65,3 +65,20 @@ fn get_default2<'m, K: Eq + Hash + Clone, V: Default>(
     map.insert(key.clone(), V::default()); // OK now.
     map.get_mut(&key).unwrap()
 }
+
+// fn lifetimes_and_fn<'a, FN>(f: FN) -> ()
+// where
+//     FN: Fn(&'a String) -> (),
+// {
+//     let string = String::new();
+//     f(&string);
+// }
+
+// --- Doesn't compile
+
+// fn lifetimes_and_fn_pointer<'a>(f: fn(&'a String)) -> ()
+// where
+// {
+//     let string = String::new();
+//     f(&string);
+// }
