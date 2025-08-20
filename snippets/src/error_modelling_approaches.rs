@@ -32,9 +32,9 @@ pub enum Layer2Error {
 }
 
 pub async fn layer1() -> Result<(), Layer1Error> {
-    let _calc_a = layer2().await?;
+    let _calc_foo = layer2().await?;
     // ...
-    let _calc_b = layer2().await?;
+    let _calc_bar = layer2().await?;
     Ok(())
 }
 
