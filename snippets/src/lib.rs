@@ -1,6 +1,9 @@
 #![allow(clippy::disallowed_names)]
 
+#[cfg(test)]
 mod error_handling;
+#[cfg(test)]
+mod error_modelling_approaches;
 mod lifetimes;
 mod trait_objects;
 
