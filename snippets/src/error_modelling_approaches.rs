@@ -31,16 +31,16 @@ pub enum Layer2Error {
     Layer2Wrapper(#[from] reqwest::Error),
 }
 
-pub async fn layer1() -> Result<(), Layer1Error> {
-    let _calc_foo = layer2().await?;
+pub async fn layer1() -> Result<u32, Layer1Error> {
+    let calc_foo = layer2().await?;
     // ...
-    let _calc_bar = layer2().await?;
-    Ok(())
+    let calc_bar = layer2().await?;
+    Ok(calc_foo + calc_bar)
 }
 
-pub async fn layer2() -> Result<(), Layer2Error> {
+pub async fn layer2() -> Result<u32, Layer2Error> {
     reqwest::get("http://asfasfasdfsa:123").await?;
-    Ok(())
+    Ok(123)
 }
 
 // ---------- Chained Error - Fine Grained
@@ -53,24 +53,26 @@ async fn chained_error_fine_grained() {
     println!("## layer1_fine_grained\n{error}\n\nDebug: {error:?}");
 }
 
-pub async fn layer1_fine_grained() -> Result<(), Layer1ErrorFineGrained> {
-    let _calc_foo = layer2()
+pub async fn layer1_fine_grained() -> Result<u32, Layer1ErrorFineGrained> {
+    let calc_foo = layer2()
         .await
         .map_err(Layer1ErrorFineGrained::Layer1WrapperCallFoo)?;
     // ...
-    let _calc_bar = layer2()
+    let calc_bar = layer2()
         .await
         .map_err(Layer1ErrorFineGrained::Layer1WrapperCallBar)?;
-    Ok(())
+    Ok(calc_foo + calc_bar)
 }
 
 #[derive(Debug, Error)]
+#[allow(clippy::enum_variant_names)]
 pub enum Layer1ErrorFineGrained {
     #[error("Layer1 Foo error: {0}")]
     Layer1WrapperCallFoo(#[source] Layer2Error),
     #[error("Layer1 Bar error: {0}")]
     Layer1WrapperCallBar(#[source] Layer2Error),
     #[error("Layer1 Xpto error: {0}")]
+    #[allow(unused)]
     Layer1WrapperCallXpto(#[source] Layer2Error),
 }
 
@@ -84,15 +86,22 @@ pub enum Layer1ErrorWithContext {
     Layer1WrapperCall(String, #[source] Layer2Error),
 }
 
-pub async fn layer1_fine_grained_with_context() -> Result<(), Layer1ErrorWithContext> {
-    let _calc_foo = layer2()
+#[tokio::test]
+async fn chained_error_with_context() {
+    let error = layer1_fine_grained_with_context().await.unwrap_err();
+
+    println!("## layer1_fine_grained\n{error}\n\nDebug: {error:?}");
+}
+
+pub async fn layer1_fine_grained_with_context() -> Result<u32, Layer1ErrorWithContext> {
+    let calc_foo = layer2()
         .await
         .map_err(|e| Layer1ErrorWithContext::Layer1WrapperCall("Foo call".to_string(), e))?;
     // ...
-    let _calc_bar = layer2()
+    let calc_bar = layer2()
         .await
         .map_err(|e| Layer1ErrorWithContext::Layer1WrapperCall("Bar call".to_string(), e))?;
-    Ok(())
+    Ok(calc_foo + calc_bar)
 }
 
 // ---------- Chained Error - Using anyhow error, and `.context()` for context info
@@ -104,14 +113,14 @@ async fn chained_error_anyhow() {
     println!("## chained_error_anyhow\n{error}\n\nDebug: {error:?}\n\n---");
 }
 
-pub async fn layer1_anyhow() -> Result<(), anyhow::Error> {
-    let _calc_foo = layer2_anyhow().await.context("Foo Call")?;
+pub async fn layer1_anyhow() -> Result<u32, anyhow::Error> {
+    let calc_foo = layer2_anyhow().await.context("Foo Call")?;
     // ...
-    let _calc_bar = layer2_anyhow().await.context("Bar Call")?;
-    Ok(())
+    let calc_bar = layer2_anyhow().await.context("Bar Call")?;
+    Ok(calc_foo + calc_bar)
 }
 
-pub async fn layer2_anyhow() -> Result<(), anyhow::Error> {
+pub async fn layer2_anyhow() -> Result<u32, anyhow::Error> {
     reqwest::get("http://asfasfasdfsa:123").await?;
-    Ok(())
+    Ok(123)
 }
