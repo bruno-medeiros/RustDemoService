@@ -10,6 +10,9 @@ members = [
     "helloworld-tonic",
 ]
 
+[workspace.package]
+edition = "2024"
+
 [workspace.dependencies]
 anyhow = "1.0.94"
 tracing = "0.1"
