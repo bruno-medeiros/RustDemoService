@@ -4,7 +4,7 @@ use std::thread;
 use std::time::Duration;
 
 use time::UtcOffset;
-use tracing::{info, warn, Level};
+use tracing::{Level, info, warn};
 use tracing_subscriber::fmt::time::OffsetTime;
 
 #[test]

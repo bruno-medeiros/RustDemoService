@@ -46,7 +46,7 @@ pub fn unwrap_without_panic<T>(x: Result<T, Infallible>) -> T {
 
 #[cfg(test)]
 mod tests {
-    use anyhow::{anyhow, bail, Context};
+    use anyhow::{Context, anyhow, bail};
 
     #[test]
     fn anyhow_display() {

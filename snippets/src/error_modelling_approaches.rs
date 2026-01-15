@@ -1,12 +1,12 @@
-use anyhow::Context;
+use anyhow::{Context, Error};
 use thiserror::Error;
+use tracing::info;
 
 #[tokio::test]
 async fn direct_error() {
-    tracing_subscriber::fmt().try_init().ok();
-
     let error = reqwest::get("http://asfasfasdfsa:123").await.unwrap_err();
-    println!("direct_error: {error}\n\nDebug:{error:?}\n");
+    println!("Display: {error}\n");
+    println!("Debug: {error:?}\n");
 }
 
 // ---------- Chained error
@@ -108,9 +108,19 @@ pub async fn layer1_fine_grained_with_context() -> Result<u32, Layer1ErrorWithCo
 
 #[tokio::test]
 async fn chained_error_anyhow() {
-    let error = layer1_anyhow().await.unwrap_err();
+    tracing_subscriber::fmt().try_init().ok();
 
-    println!("## chained_error_anyhow\n{error}\n\nDebug: {error:?}\n\n---");
+    let error: Error = layer1_anyhow().await.unwrap_err();
+
+    println!("## chained_error_anyhow");
+    println!("{error}");
+    println!("Debug: {error:?}\n---");
+
+    // tracing::error!(error = &error as &(dyn std::error::Error));
+    tracing::error!(error = &*error as &(dyn std::error::Error));
+
+    info!(error = %error, "%Error:");
+    info!(error = ?error, "?Error:");
 }
 
 pub async fn layer1_anyhow() -> Result<u32, anyhow::Error> {
