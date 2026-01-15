@@ -117,7 +117,7 @@ async fn chained_error_anyhow() {
     println!("Debug: {error:?}\n---");
 
     // tracing::error!(error = &error as &(dyn std::error::Error));
-    tracing::error!(error = &*error as &(dyn std::error::Error));
+    tracing::error!(error = &*error as &dyn std::error::Error);
 
     info!(error = %error, "%Error:");
     info!(error = ?error, "?Error:");
