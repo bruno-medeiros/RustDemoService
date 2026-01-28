@@ -11,10 +11,7 @@ use crate::api::{CreateNoteBodyRequest, Note, UpdateNoteBodyRequest};
 #[derive(Debug, Clone)]
 pub enum ServiceError {
     /// A note with the same author and title already exists.
-    DuplicateAuthorTitle {
-        author: String,
-        title: String,
-    },
+    DuplicateAuthorTitle { author: String, title: String },
 }
 
 /// In-memory CRUD service for notes.

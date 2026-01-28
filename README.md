@@ -12,3 +12,11 @@ Learning project for creating a web-service using Rust ecosystem, as well as set
 
 * Code Style: Run `cargo +nightly fmt -- --config-path=.rustfmt.toml`
     * (Ideally configure this in the IDE to run on save or on commit)
+
+### demo-notes – Swagger UI
+
+The Notes API in `demo-notes` exposes OpenAPI docs and Swagger UI.
+
+1. Start the service: `cargo run -p demo-notes`
+2. Open Swagger UI in a browser: [http://localhost:3030/swagger-ui](http://localhost:3030/swagger-ui)
+3. Raw OpenAPI spec (JSON): [http://localhost:3030/api-docs/openapi.json](http://localhost:3030/api-docs/openapi.json)
