@@ -7,6 +7,7 @@ members = [
     "domain-tx",
     "snippets",
     "demo_svc",
+    "demo-notes",
     "helloworld-tonic",
 ]
 
