@@ -1,4 +1,9 @@
 /.idea/*
 
 target/
-/demo-notes/openapi.json
+/demo-notes/openapi*.json
+/demo-notes/client/src/lib.rs
+/demo-notes/client/Cargo.toml
+/demo-notes-smithy/openapi*.json
+/demo-notes-smithy/client/
+/demo-notes-smithy/build/

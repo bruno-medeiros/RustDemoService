@@ -8,6 +8,7 @@ members = [
     "snippets",
     "demo_svc",
     "demo-notes/service",
+    "demo-notes-smithy/service",
     "helloworld-tonic",
 ]
 

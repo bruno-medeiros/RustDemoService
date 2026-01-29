@@ -53,6 +53,7 @@ pub struct UpdateNoteBodyRequest {
 
 /// Query parameters for the list notes endpoint.
 #[derive(Debug, Default, Deserialize, ToSchema, utoipa::IntoParams)]
+#[into_params(parameter_in = Query)]
 pub struct ListNotesRequest {
     /// Maximum number of notes to return.
     pub limit: Option<u32>,
