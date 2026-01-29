@@ -6,6 +6,8 @@ pub mod test_commons {
     use time::UtcOffset;
     use tracing_subscriber::filter::LevelFilter;
     use tracing_subscriber::fmt::time::OffsetTime;
+    use tracing_subscriber::layer::SubscriberExt;
+    use tracing_subscriber::util::SubscriberInitExt;
     use tracing_subscriber::EnvFilter;
 
     static INIT: Once = Once::new();
@@ -17,15 +19,16 @@ pub mod test_commons {
                 offset,
                 format_description!("[hour]:[minute]:[second].[subsecond digits:6]"),
             );
+            let format = tracing_subscriber::fmt::layer().with_timer(timer);
 
             let filter = EnvFilter::builder()
                 .with_default_directive(LevelFilter::INFO.into())
                 .from_env()
                 .unwrap();
 
-            tracing_subscriber::fmt()
-                .with_env_filter(filter)
-                .with_timer(timer)
+            tracing_subscriber::registry()
+                .with(format)
+                .with(filter)
                 .init();
         });
     }
