@@ -1,6 +1,6 @@
 [workspace]
 
-resolver = "2"
+resolver = "3"
 
 members = [
     "commons",
@@ -8,7 +8,8 @@ members = [
     "snippets",
     "demo_svc",
     "demo-notes/service",
-    "demo-notes-smithy/service",
+    "demo-notes2/server",
+    "demo-notes2/client",
     "helloworld-tonic",
 ]
 
