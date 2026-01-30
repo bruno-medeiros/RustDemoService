@@ -6,11 +6,11 @@ use async_trait::async_trait;
 use sqlx::postgres::PgRow;
 use sqlx::{Pool, Postgres, Row};
 use tracing::info;
-use tx_model::{Account, AccountId};
 use uuid::Uuid;
 
 use crate::accounts::api::{
-    AccountsApi, CreateAccountResponse, DepositResult, GetBalanceResult, WithdrawResult,
+    Account, AccountId, AccountsApi, CreateAccountResponse, DepositResult, GetBalanceResult,
+    WithdrawResult,
 };
 
 #[derive(Default)]

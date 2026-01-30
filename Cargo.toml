@@ -4,7 +4,6 @@ resolver = "3"
 
 members = [
     "commons",
-    "domain-tx",
     "snippets",
     "demo_svc",
     "demo-notes/service",

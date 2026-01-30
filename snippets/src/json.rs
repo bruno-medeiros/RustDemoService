@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+#[allow(unused)]
 #[derive(Serialize, Deserialize)]
 pub struct ExampleDto {
     // #[serde(with = "uuid::serde::simple")]

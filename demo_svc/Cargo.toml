@@ -20,7 +20,6 @@ trait-variant = "0.1.2"
 uuid.workspace = true
 
 rust-demo-commons = { path = "../commons" }
-tx-model = { path = "../domain-tx" }
 
 
 axum = "0.7.9"

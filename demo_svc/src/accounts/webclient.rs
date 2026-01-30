@@ -6,11 +6,10 @@ use reqwest::Client;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use tracing::debug;
-use tx_model::AccountId;
 
 use crate::accounts::api::{
-    AccountsApi, CreateAccountParams, CreateAccountResponse, DepositParams, DepositResult,
-    GetBalanceResult, WithdrawParams, WithdrawResult,
+    AccountId, AccountsApi, CreateAccountParams, CreateAccountResponse, DepositParams,
+    DepositResult, GetBalanceResult, WithdrawParams, WithdrawResult,
 };
 
 #[derive(Clone, Debug)]

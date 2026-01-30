@@ -8,9 +8,10 @@ use axum::{Json, Router};
 use sqlx::postgres::PgPoolOptions;
 use tokio::sync::Mutex;
 use tracing::info;
-use tx_model::AccountId;
 
-use crate::accounts::api::{AccountsApi, CreateAccountParams, DepositParams, WithdrawParams};
+use crate::accounts::api::{
+    AccountId, AccountsApi, CreateAccountParams, DepositParams, WithdrawParams,
+};
 use crate::accounts::service::SqlAccountsService;
 use crate::app_util::{to_response, to_response_with_ok_status};
 use crate::AppState;
