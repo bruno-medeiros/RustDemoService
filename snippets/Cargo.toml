@@ -1,5 +1,5 @@
 [package]
-name = "rust-snippets"
+name = "snippets"
 version = "0.1.0"
 edition.workspace = true
 

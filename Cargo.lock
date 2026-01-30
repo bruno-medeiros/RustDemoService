@@ -2946,24 +2946,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rust-snippets"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "http 1.4.0",
- "reqwest",
- "serde",
- "serde_json",
- "thiserror",
- "time",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "url",
- "uuid",
-]
-
-[[package]]
 name = "rustc-hash"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3315,6 +3297,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "snippets"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "http 1.4.0",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "time",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "url",
+ "uuid",
 ]
 
 [[package]]
