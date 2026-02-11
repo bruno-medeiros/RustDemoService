@@ -9,6 +9,8 @@ members = [
     "demo-notes/service",
     "demo-notes2/server",
     "demo-notes2/client",
+    "catalog-svc/server",
+    "catalog-svc/client",
     "helloworld-tonic",
 ]
 

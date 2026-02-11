@@ -632,6 +632,67 @@ dependencies = [
 ]
 
 [[package]]
+name = "catalog-svc-client"
+version = "0.1.0"
+dependencies = [
+ "catalog_client_api",
+ "clap",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "catalog-svc-server"
+version = "0.1.0"
+dependencies = [
+ "catalog_api",
+ "clap",
+ "http 0.2.12",
+ "hyper 0.14.32",
+ "tokio",
+ "tower 0.5.2",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
+]
+
+[[package]]
+name = "catalog_api"
+version = "0.1.0"
+dependencies = [
+ "aws-smithy-http",
+ "aws-smithy-http-server",
+ "aws-smithy-json",
+ "aws-smithy-runtime-api",
+ "aws-smithy-types",
+ "futures-util",
+ "http 0.2.12",
+ "hyper 0.14.32",
+ "mime",
+ "pin-project-lite",
+ "tokio",
+ "tower 0.4.13",
+ "tracing",
+]
+
+[[package]]
+name = "catalog_client_api"
+version = "0.1.0"
+dependencies = [
+ "aws-smithy-async",
+ "aws-smithy-http",
+ "aws-smithy-json",
+ "aws-smithy-runtime",
+ "aws-smithy-runtime-api",
+ "aws-smithy-types",
+ "bytes",
+ "fastrand",
+ "http 0.2.12",
+ "tracing",
+]
+
+[[package]]
 name = "cbor-diag"
 version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -1,0 +1,12 @@
+{
+  "version": "1.0",
+  "plugins": {
+    "rust-server-codegen": {
+      "service": "com.github.bruno_medeiros#CatalogService",
+      "module": "catalog_api",
+      "moduleVersion": "0.1.0",
+      "moduleDescription": "Catalog Server",
+      "moduleAuthors": ["Smithy Team"]
+    }
+  }
+}

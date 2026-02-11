@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "plugins": {
+    "rust-client-codegen": {
+      "codegen": {
+        "addMessageToErrors": true,
+        "renameErrors": true,
+        "enableNewSmithyRuntime": "orchestrator"
+      },
+      "service": "com.github.bruno_medeiros#CatalogService",
+      "module": "catalog_client_api",
+      "moduleVersion": "0.1.0",
+      "moduleDescription": "Catalog client",
+      "moduleAuthors": ["Smithy Team"]
+    }
+  }
+}
