@@ -10,6 +10,10 @@ use catalog_api::server::{
 };
 use catalog_api::{CatalogService, CatalogServiceConfig};
 use catalog_svc_server::hello_world;
+use catalog_svc_server::server::{
+    AppState, create_catalog_item, delete_catalog_item, get_catalog_item, list_catalog_items,
+    update_catalog_item,
+};
 use clap::Parser;
 use hyper::StatusCode;
 use tracing_subscriber::{EnvFilter, prelude::*};
@@ -56,7 +60,7 @@ async fn main() {
     let model_plugins = ModelPlugins::new();
 
     let config = CatalogServiceConfig::builder()
-        .layer(AddExtensionLayer::new(Arc::new(())))
+        .layer(AddExtensionLayer::new(Arc::new(AppState::default())))
         .layer(AlbHealthCheckLayer::from_handler("/ping", |_req| async {
             StatusCode::OK
         }))
@@ -67,6 +71,11 @@ async fn main() {
 
     let app = CatalogService::builder(config)
         .hello_world(hello_world)
+        .create_catalog_item(create_catalog_item)
+        .delete_catalog_item(delete_catalog_item)
+        .get_catalog_item(get_catalog_item)
+        .list_catalog_items(list_catalog_items)
+        .update_catalog_item(update_catalog_item)
         .build()
         .expect("failed to build CatalogService");
 

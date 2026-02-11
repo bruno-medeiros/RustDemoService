@@ -1,3 +1,5 @@
+pub mod server;
+
 use catalog_api::{input, output};
 
 /// Handler for HelloWorld: returns "Hello World".
