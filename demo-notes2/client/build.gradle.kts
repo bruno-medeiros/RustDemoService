@@ -13,7 +13,7 @@ dependencies {
     smithyBuild("software.amazon.smithy.rust:codegen-client:$smithyRsVersion")
 
     // === Service model ===
-    implementation(project(":smithy"))
+    implementation(project(":demo-notes2:smithy"))
 
 }
 

@@ -1,4 +1,4 @@
-rootProject.name = "demo-notes--smithy-rust-quickstart"
+rootProject.name = "rust-demo"
 
 pluginManagement {
     val smithyGradleVersion: String by settings
@@ -14,7 +14,14 @@ pluginManagement {
     }
 }
 
-// Subprojects
-include("client")
-include("smithy")
-include("server")
+// === Modules ===
+include("catalog-svc")
+include("catalog-svc:client")
+include("catalog-svc:smithy")
+include("catalog-svc:server")
+
+include("demo-notes2")
+include("demo-notes2:client")
+include("demo-notes2:smithy")
+include("demo-notes2:server")
+
