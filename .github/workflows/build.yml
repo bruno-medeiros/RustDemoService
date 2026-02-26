@@ -19,7 +19,7 @@ jobs:
       - name: Run gradle parent build
         run: ./gradlew build
       - name: Install non-Cargo deps
-        run: sudo apt-get install -y cmake protobuf-compiler
+        run: apt-get update -y && sudo apt-get install -y cmake protobuf-compiler
       - name: Build
         run: cargo build
       - name: Lint
