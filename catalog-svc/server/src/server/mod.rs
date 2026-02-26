@@ -11,13 +11,15 @@ use catalog_api::model::{CatalogItem, Uuid};
 use catalog_api::server::request::extension::Extension;
 use catalog_api::{error, input, output};
 use catalog_api::{error::ValidationException, types::DateTime};
+use sqlx::PgPool;
 
 use crate::server::dtos::{shape_to_create_output, shape_to_get_output, shape_to_update_output};
 
-/// Shared application state holding catalog items by id.
-#[derive(Debug, Default)]
+/// Shared application state holding catalog items and the PostgreSQL pool.
+#[derive(Debug)]
 pub struct AppState {
     pub items: RwLock<HashMap<Uuid, CatalogItem>>,
+    pub pg_pool: PgPool,
 }
 
 fn not_found_error() -> ValidationException {

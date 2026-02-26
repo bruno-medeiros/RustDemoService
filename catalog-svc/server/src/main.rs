@@ -1,4 +1,4 @@
-use std::{net::SocketAddr, sync::Arc};
+use std::{collections::HashMap, net::SocketAddr, sync::{Arc, RwLock}};
 
 use catalog_api::server::{
     AddExtensionLayer,
@@ -9,6 +9,7 @@ use catalog_api::server::{
     request::request_id::ServerRequestIdProviderLayer,
 };
 use catalog_api::{CatalogService, CatalogServiceConfig};
+use catalog_svc_server::config::{create_pg_pool, AppConfig};
 use catalog_svc_server::hello_world;
 use catalog_svc_server::server::{
     AppState, create_catalog_item, delete_catalog_item, get_catalog_item, list_catalog_items,
@@ -49,7 +50,13 @@ async fn main() {
     let args = Args::parse();
     setup_tracing();
 
-    let http_plugins = HttpPlugins::new()
+    let app_config = AppConfig::load().expect("failed to load app config");
+    let pg_pool = create_pg_pool(&app_config.postgres)
+        .await
+        .expect("failed to create PostgreSQL pool");
+    tracing::info!("PostgreSQL pool initialized");
+
+    let http_plugins                     = HttpPlugins::new()
         // Apply the `OperationExtensionPlugin` defined in `aws_smithy_http_server::extension`. This allows other
         // plugins or tests to access a `aws_smithy_http_server::extension::OperationExtension` from
         // `Response::extensions`, or infer routing failure when it's missing.
@@ -59,8 +66,13 @@ async fn main() {
 
     let model_plugins = ModelPlugins::new();
 
+    let app_state = Arc::new(AppState {
+        items: RwLock::new(HashMap::new()),
+        pg_pool,
+    });
+
     let config = CatalogServiceConfig::builder()
-        .layer(AddExtensionLayer::new(Arc::new(AppState::default())))
+        .layer(AddExtensionLayer::new(app_state))
         .layer(AlbHealthCheckLayer::from_handler("/ping", |_req| async {
             StatusCode::OK
         }))
