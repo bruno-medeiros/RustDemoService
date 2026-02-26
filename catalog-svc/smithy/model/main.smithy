@@ -97,17 +97,17 @@ operation GetCatalogItem {
     ]
 }
 
-/// Update input: resource id plus catalog item body (same shape as CatalogItem)
-structure UpdateCatalogItemInput with [CatalogItemBodyMixin] {
-    @required
-    @httpLabel
-    itemId: Uuid
-}
-
 @http(method: "POST", uri: "/catalog/items/{itemId}")
 operation UpdateCatalogItem {
-    input: UpdateCatalogItemInput
+    /// Update input: resource id plus catalog item body (same shape as CatalogItem)
+    input := with [CatalogItemBodyMixin] {
+        @required
+        @httpLabel
+        itemId: Uuid
+    }
+
     output: CatalogItem
+
     errors: [
         ValidationException
     ]
