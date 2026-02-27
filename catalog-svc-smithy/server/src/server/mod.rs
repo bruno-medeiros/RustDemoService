@@ -46,7 +46,7 @@ pub async fn create_catalog_item(
     };
 
     let item: CatalogItem = state.catalog.create(body).await;
-    service_item_to_create_output(item).map_err(internal_error_for_create)
+    Ok(service_item_to_create_output(item))
 }
 
 /// Handler for GetCatalogItem: delegates to the domain CatalogService.
@@ -54,12 +54,9 @@ pub async fn get_catalog_item(
     input: input::GetCatalogItemInput,
     Extension(state): Extension<Arc<AppState>>,
 ) -> Result<output::GetCatalogItemOutput, error::GetCatalogItemError> {
-    let item_id: uuid::Uuid = uuid_from_smithy(input.item_id()).map_err(internal_error_for_get)?;
-
-    match state.catalog.get(item_id).await {
-        Some(item) => service_item_to_get_output(item).map_err(internal_error_for_get),
-        None => Err(error::GetCatalogItemError::from(not_found_error_404())),
-    }
+    let item_id: uuid::Uuid = uuid_from_smithy(input.item_id()).map_err(dto_internal)?;
+    let item = state.catalog.get(item_id).await.ok_or_else(not_found_error_404)?;
+    Ok(service_item_to_get_output(item))
 }
 
 /// Handler for UpdateCatalogItem: delegates to the domain CatalogService.
@@ -67,8 +64,7 @@ pub async fn update_catalog_item(
     input: input::UpdateCatalogItemInput,
     Extension(state): Extension<Arc<AppState>>,
 ) -> Result<output::UpdateCatalogItemOutput, error::UpdateCatalogItemError> {
-    let item_id: uuid::Uuid =
-        uuid_from_smithy(&input.item_id).map_err(internal_error_for_update)?;
+    let item_id: uuid::Uuid = uuid_from_smithy(&input.item_id).map_err(dto_internal)?;
 
     let body = UpdateCatalogItemBody {
         name: input.name,
@@ -79,10 +75,8 @@ pub async fn update_catalog_item(
         price: input.price,
     };
 
-    match state.catalog.update(item_id, body).await {
-        Some(item) => service_item_to_update_output(item).map_err(internal_error_for_update),
-        None => Err(error::UpdateCatalogItemError::from(not_found_error_404())),
-    }
+    let item = state.catalog.update(item_id, body).await.ok_or_else(not_found_error_404)?;
+    Ok(service_item_to_update_output(item))
 }
 
 /// Handler for DeleteCatalogItem: delegates to the domain CatalogService.
@@ -90,13 +84,12 @@ pub async fn delete_catalog_item(
     input: input::DeleteCatalogItemInput,
     Extension(state): Extension<Arc<AppState>>,
 ) -> Result<output::DeleteCatalogItemOutput, error::DeleteCatalogItemError> {
-    let item_id: uuid::Uuid =
-        uuid_from_smithy(input.item_id()).map_err(internal_error_for_delete)?;
+    let item_id: uuid::Uuid = uuid_from_smithy(input.item_id()).map_err(dto_internal)?;
 
     if state.catalog.delete(item_id).await {
         Ok(output::DeleteCatalogItemOutput {})
     } else {
-        Err(error::DeleteCatalogItemError::from(not_found_error_404()))
+        Err(not_found_error_404().into())
     }
 }
 
@@ -120,26 +113,8 @@ pub async fn list_catalog_items(
     })
 }
 
-fn internal_error_for_create(err: DtoConversionError) -> error::CreateCatalogItemError {
-    error::CreateCatalogItemError::from(error::InternalServerError {
+fn dto_internal(err: DtoConversionError) -> error::InternalServerError {
+    error::InternalServerError {
         message: Some(format!("DTO mapping failure: {err}")),
-    })
-}
-
-fn internal_error_for_get(err: DtoConversionError) -> error::GetCatalogItemError {
-    error::GetCatalogItemError::from(error::InternalServerError {
-        message: Some(format!("DTO mapping failure: {err}")),
-    })
-}
-
-fn internal_error_for_update(err: DtoConversionError) -> error::UpdateCatalogItemError {
-    error::UpdateCatalogItemError::from(error::InternalServerError {
-        message: Some(format!("DTO mapping failure: {err}")),
-    })
-}
-
-fn internal_error_for_delete(err: DtoConversionError) -> error::DeleteCatalogItemError {
-    error::DeleteCatalogItemError::from(error::InternalServerError {
-        message: Some(format!("DTO mapping failure: {err}")),
-    })
+    }
 }

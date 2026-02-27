@@ -58,11 +58,9 @@ pub fn service_item_to_smithy_item(value: CatalogItem) -> smithy::CatalogItem {
     }
 }
 
-pub fn service_item_to_create_output(
-    value: CatalogItem,
-) -> Result<output::CreateCatalogItemOutput, DtoConversionError> {
+pub fn service_item_to_create_output(value: CatalogItem) -> output::CreateCatalogItemOutput {
     let item = service_item_to_smithy_item(value);
-    Ok(output::CreateCatalogItemOutput {
+    output::CreateCatalogItemOutput {
         name: item.name,
         description: item.description,
         category: item.category,
@@ -72,14 +70,12 @@ pub fn service_item_to_create_output(
         item_id: item.item_id,
         created_at: item.created_at,
         modified_at: item.modified_at,
-    })
+    }
 }
 
-pub fn service_item_to_get_output(
-    value: CatalogItem,
-) -> Result<output::GetCatalogItemOutput, DtoConversionError> {
+pub fn service_item_to_get_output(value: CatalogItem) -> output::GetCatalogItemOutput {
     let item = service_item_to_smithy_item(value);
-    Ok(output::GetCatalogItemOutput {
+    output::GetCatalogItemOutput {
         name: item.name,
         description: item.description,
         category: item.category,
@@ -89,14 +85,12 @@ pub fn service_item_to_get_output(
         item_id: item.item_id,
         created_at: item.created_at,
         modified_at: item.modified_at,
-    })
+    }
 }
 
-pub fn service_item_to_update_output(
-    value: CatalogItem,
-) -> Result<output::UpdateCatalogItemOutput, DtoConversionError> {
+pub fn service_item_to_update_output(value: CatalogItem) -> output::UpdateCatalogItemOutput {
     let item = service_item_to_smithy_item(value);
-    Ok(output::UpdateCatalogItemOutput {
+    output::UpdateCatalogItemOutput {
         name: item.name,
         description: item.description,
         category: item.category,
@@ -106,7 +100,7 @@ pub fn service_item_to_update_output(
         item_id: item.item_id,
         created_at: item.created_at,
         modified_at: item.modified_at,
-    })
+    }
 }
 
 pub fn service_items_to_smithy_items(items: Vec<CatalogItem>) -> Vec<smithy::CatalogItem> {
