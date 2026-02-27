@@ -679,6 +679,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "catalog-svc-utoipa"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum 0.7.9",
+ "chrono",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "utoipa",
+ "utoipa-swagger-ui",
+ "uuid",
+]
+
+[[package]]
 name = "catalog_api"
 version = "0.1.0"
 dependencies = [

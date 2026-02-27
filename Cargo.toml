@@ -11,6 +11,7 @@ members = [
     "demo-notes2/client",
     "catalog-svc/server",
     "catalog-svc/client",
+    "catalog-svc-utoipa/service",
     "helloworld-tonic",
 ]
 
