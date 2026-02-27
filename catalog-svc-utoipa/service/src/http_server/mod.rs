@@ -9,11 +9,11 @@ use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 use uuid::Uuid;
 
-use crate::api::{
+use crate::catalog::api::{
     CatalogItem, CreateCatalogItemBody, ListCatalogItemsRequest, ListCatalogItemsResponse,
     UpdateCatalogItemBody,
 };
-use crate::service::CatalogService;
+use crate::catalog::service::CatalogService;
 
 /// OpenAPI spec for the Catalog API (used for client generation and Swagger UI).
 #[derive(OpenApi)]
@@ -44,7 +44,10 @@ pub struct AppState {
 pub fn router(catalog: CatalogService) -> Router {
     let state = AppState { catalog };
     let api = Router::new()
-        .route("/catalog/items", post(create_catalog_item).get(list_catalog_items))
+        .route(
+            "/catalog/items",
+            post(create_catalog_item).get(list_catalog_items),
+        )
         .route(
             "/catalog/items/{item_id}",
             get(get_catalog_item)

@@ -5,7 +5,7 @@ use chrono::Utc;
 use tokio::sync::RwLock;
 use uuid::Uuid;
 
-use crate::api::{
+use crate::catalog::api::{
     CatalogItem, CreateCatalogItemBody, ListCatalogItemsRequest, ListCatalogItemsResponse,
     UpdateCatalogItemBody,
 };
@@ -73,11 +73,7 @@ impl CatalogService {
     }
 
     /// Update a catalog item. Returns the updated item or None if not found.
-    pub async fn update(
-        &self,
-        item_id: Uuid,
-        body: UpdateCatalogItemBody,
-    ) -> Option<CatalogItem> {
+    pub async fn update(&self, item_id: Uuid, body: UpdateCatalogItemBody) -> Option<CatalogItem> {
         let mut store = self.store.write().await;
         if let Some(item) = store.get_mut(&item_id) {
             item.name = body.name;
