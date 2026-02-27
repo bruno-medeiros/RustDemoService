@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
@@ -21,7 +21,7 @@ pub struct CatalogItem {
     pub description: String,
     pub category: Category,
     /// Date with day resolution only (YYYY-MM-DD).
-    pub date: String,
+    pub date: NaiveDate,
     pub brand: Option<String>,
     /// Price as decimal string (e.g. "19.99").
     pub price: String,

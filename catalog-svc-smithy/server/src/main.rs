@@ -1,4 +1,4 @@
-use std::{collections::HashMap, net::SocketAddr, sync::{Arc, RwLock}};
+use std::{net::SocketAddr, sync::Arc};
 
 use catalog_api::server::{
     AddExtensionLayer,
@@ -9,6 +9,7 @@ use catalog_api::server::{
     request::request_id::ServerRequestIdProviderLayer,
 };
 use catalog_api::{CatalogService, CatalogServiceConfig};
+use catalog_svc::catalog::service::CatalogService as DomainCatalogService;
 use catalog_svc_server::config::{create_pg_pool, AppConfig};
 use catalog_svc_server::hello_world;
 use catalog_svc_server::server::{
@@ -51,7 +52,7 @@ async fn main() {
     setup_tracing();
 
     let app_config = AppConfig::load().expect("failed to load app config");
-    let pg_pool = create_pg_pool(&app_config.postgres)
+    let _pg_pool = create_pg_pool(&app_config.postgres)
         .await
         .expect("failed to create PostgreSQL pool");
     tracing::info!("PostgreSQL pool initialized");
@@ -66,10 +67,8 @@ async fn main() {
 
     let model_plugins = ModelPlugins::new();
 
-    let app_state = Arc::new(AppState {
-        items: RwLock::new(HashMap::new()),
-        pg_pool,
-    });
+    let catalog = DomainCatalogService::new();
+    let app_state = Arc::new(AppState { catalog });
 
     let config = CatalogServiceConfig::builder()
         .layer(AddExtensionLayer::new(app_state))

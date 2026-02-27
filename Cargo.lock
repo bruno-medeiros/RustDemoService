@@ -683,15 +683,15 @@ dependencies = [
 name = "catalog-svc-server"
 version = "0.1.0"
 dependencies = [
+ "catalog-svc",
  "catalog_api",
+ "chrono",
  "clap",
  "config",
- "http 0.2.12",
  "hyper 0.14.32",
  "serde",
  "sqlx",
  "tokio",
- "tower 0.5.2",
  "tracing",
  "tracing-subscriber",
  "uuid",

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use chrono::Utc;
+use chrono::{NaiveDate, Utc};
 use tokio::sync::RwLock;
 use uuid::Uuid;
 
@@ -25,12 +25,14 @@ impl CatalogService {
     pub async fn create(&self, body: CreateCatalogItemBody) -> CatalogItem {
         let item_id = Uuid::new_v4();
         let now = Utc::now();
+        // FIXME: handle invalid date format with exception
+        let date = NaiveDate::parse_from_str(&body.date, "%Y-%m-%d").expect("invalid date format");
         let item = CatalogItem {
             item_id,
             name: body.name,
             description: body.description,
             category: body.category,
-            date: body.date,
+            date,
             brand: body.brand,
             price: body.price,
             created_at: now,
@@ -76,10 +78,13 @@ impl CatalogService {
     pub async fn update(&self, item_id: Uuid, body: UpdateCatalogItemBody) -> Option<CatalogItem> {
         let mut store = self.store.write().await;
         if let Some(item) = store.get_mut(&item_id) {
+            // FIXME: exception
+            let date =
+                NaiveDate::parse_from_str(&body.date, "%Y-%m-%d").expect("invalid date format");
             item.name = body.name;
             item.description = body.description;
             item.category = body.category;
-            item.date = body.date;
+            item.date = date;
             item.brand = body.brand;
             item.price = body.price;
             item.modified_at = Utc::now();
