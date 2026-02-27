@@ -1,0 +1,25 @@
+---
+description: Smithy vs service type naming in Rust — use module aliasing when names conflict
+globs: **/*.rs
+alwaysApply: false
+---
+
+# Smithy type naming in Rust
+
+When Smithy-generated types and application/domain types share the same names (e.g. `CatalogItem`, `Category`):
+
+- **Refer to Smithy types by renaming the parent module, not the type.** Keep service/domain types under their original names; disambiguate only the Smithy side via the module path.
+- **Apply this only when there are name conflicts.** If there is no clash, use types directly without aliasing.
+
+**Good:** alias the parent module and use type names as-is with a module prefix for Smithy:
+
+```rust
+use catalog_api::model as smithy;
+use catalog_api::types as smithy_types;
+use catalog_svc::catalog::api::{CatalogItem, Category};
+
+fn map_category_from_smithy(value: smithy::Category) -> Category { ... }
+fn to_smithy(value: CatalogItem) -> smithy::CatalogItem { ... }
+```
+
+**Avoid:** renaming the types themselves (e.g. `SmithyCatalogItem`, `ServiceCategory`).

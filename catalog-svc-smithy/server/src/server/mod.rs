@@ -3,15 +3,12 @@
 pub mod dtos;
 
 use std::sync::Arc;
-use std::time::{SystemTime, UNIX_EPOCH};
 
-use catalog_api::model::Uuid as SmithyUuid;
 use catalog_api::server::request::extension::Extension;
 use catalog_api::{error, input, output};
-use catalog_api::{error::NotFoundError, types::DateTime};
+use catalog_api::{error::NotFoundError};
 use catalog_svc::catalog::api::{
-    CatalogItem as ServiceCatalogItem, CreateCatalogItemBody,
-    ListCatalogItemsRequest as ServiceListRequest, ListCatalogItemsResponse as ServiceListResponse,
+    CatalogItem, CreateCatalogItemBody, ListCatalogItemsRequest, ListCatalogItemsResponse,
     UpdateCatalogItemBody,
 };
 use catalog_svc::catalog::service::CatalogService;
@@ -19,6 +16,7 @@ use catalog_svc::catalog::service::CatalogService;
 use crate::server::dtos::{
     DtoConversionError, map_category_from_smithy, service_item_to_create_output,
     service_item_to_get_output, service_item_to_update_output, service_items_to_smithy_items,
+    uuid_from_smithy,
 };
 
 /// Shared application state holding the catalog domain service.
@@ -47,7 +45,7 @@ pub async fn create_catalog_item(
         price: input.price,
     };
 
-    let item: ServiceCatalogItem = state.catalog.create(body).await;
+    let item: CatalogItem = state.catalog.create(body).await;
     service_item_to_create_output(item).map_err(internal_error_for_create)
 }
 
@@ -107,12 +105,12 @@ pub async fn list_catalog_items(
     input: input::ListCatalogItemsInput,
     Extension(state): Extension<Arc<AppState>>,
 ) -> Result<output::ListCatalogItemsOutput, error::ListCatalogItemsError> {
-    let req = ServiceListRequest {
+    let req = ListCatalogItemsRequest {
         max_results: input.max_results,
         next_token: input.next_token,
     };
 
-    let ServiceListResponse { items, next_token } = state.catalog.list(req).await;
+    let ListCatalogItemsResponse { items, next_token } = state.catalog.list(req).await;
 
     let smithy_items = service_items_to_smithy_items(items);
 
@@ -120,11 +118,6 @@ pub async fn list_catalog_items(
         items: smithy_items,
         next_token,
     })
-}
-
-fn uuid_from_smithy(value: &SmithyUuid) -> Result<uuid::Uuid, DtoConversionError> {
-    uuid::Uuid::parse_str(&value.to_string())
-        .map_err(|_| DtoConversionError::InvalidUuid(value.to_string()))
 }
 
 fn internal_error_for_create(err: DtoConversionError) -> error::CreateCatalogItemError {

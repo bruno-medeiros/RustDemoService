@@ -1,10 +1,10 @@
 use std::convert::TryFrom;
 use std::fmt;
 
-use catalog_api::model::{CatalogItem as SmithyCatalogItem, Category as SmithyCategory, DateOnly};
+use catalog_api::model as smithy;
 use catalog_api::output;
-use catalog_api::types::DateTime as SmithyDateTime;
-use catalog_svc::catalog::api::{CatalogItem as ServiceCatalogItem, Category as ServiceCategory};
+use catalog_api::types as smithy_types;
+use catalog_svc::catalog::api::{CatalogItem, Category};
 
 /// Error type for DTO conversions between smithy `catalog_api` types and `catalog_svc` types.
 #[derive(Debug)]
@@ -24,28 +24,28 @@ impl fmt::Display for DtoConversionError {
 
 impl std::error::Error for DtoConversionError {}
 
-pub fn map_category_from_smithy(value: SmithyCategory) -> ServiceCategory {
+pub fn map_category_from_smithy(value: smithy::Category) -> Category {
     match value {
-        SmithyCategory::Books => ServiceCategory::Books,
-        SmithyCategory::Electronics => ServiceCategory::Electronics,
+        smithy::Category::Books => Category::Books,
+        smithy::Category::Electronics => Category::Electronics,
     }
 }
 
-pub fn map_category_to_smithy(value: ServiceCategory) -> SmithyCategory {
+pub fn map_category_to_smithy(value: Category) -> smithy::Category {
     match value {
-        ServiceCategory::Books => SmithyCategory::Books,
-        ServiceCategory::Electronics => SmithyCategory::Electronics,
+        Category::Books => smithy::Category::Books,
+        Category::Electronics => smithy::Category::Electronics,
     }
 }
 
-pub fn service_item_to_smithy_item(value: ServiceCatalogItem) -> SmithyCatalogItem {
+pub fn service_item_to_smithy_item(value: CatalogItem) -> smithy::CatalogItem {
     let created_at = chrono_to_smithy_datetime(value.created_at);
     let modified_at = chrono_to_smithy_datetime(value.modified_at);
 
     let item_id = smithy_uuid_from_domain(value.item_id);
     let date = naive_date_to_smithy(value.date);
 
-    SmithyCatalogItem {
+    smithy::CatalogItem {
         name: value.name,
         description: value.description,
         category: map_category_to_smithy(value.category),
@@ -59,7 +59,7 @@ pub fn service_item_to_smithy_item(value: ServiceCatalogItem) -> SmithyCatalogIt
 }
 
 pub fn service_item_to_create_output(
-    value: ServiceCatalogItem,
+    value: CatalogItem,
 ) -> Result<output::CreateCatalogItemOutput, DtoConversionError> {
     let item = service_item_to_smithy_item(value);
     Ok(output::CreateCatalogItemOutput {
@@ -76,7 +76,7 @@ pub fn service_item_to_create_output(
 }
 
 pub fn service_item_to_get_output(
-    value: ServiceCatalogItem,
+    value: CatalogItem,
 ) -> Result<output::GetCatalogItemOutput, DtoConversionError> {
     let item = service_item_to_smithy_item(value);
     Ok(output::GetCatalogItemOutput {
@@ -93,7 +93,7 @@ pub fn service_item_to_get_output(
 }
 
 pub fn service_item_to_update_output(
-    value: ServiceCatalogItem,
+    value: CatalogItem,
 ) -> Result<output::UpdateCatalogItemOutput, DtoConversionError> {
     let item = service_item_to_smithy_item(value);
     Ok(output::UpdateCatalogItemOutput {
@@ -109,21 +109,26 @@ pub fn service_item_to_update_output(
     })
 }
 
-pub fn service_items_to_smithy_items(items: Vec<ServiceCatalogItem>) -> Vec<SmithyCatalogItem> {
+pub fn service_items_to_smithy_items(items: Vec<CatalogItem>) -> Vec<smithy::CatalogItem> {
     items.into_iter().map(service_item_to_smithy_item).collect()
 }
 
-fn smithy_uuid_from_domain(id: uuid::Uuid) -> catalog_api::model::Uuid {
-    catalog_api::model::Uuid::try_from(id.to_string())
-        .expect("domain uuid::Uuid should always map to catalog_api::model::Uuid")
+pub fn uuid_from_smithy(value: &smithy::Uuid) -> Result<uuid::Uuid, DtoConversionError> {
+    uuid::Uuid::parse_str(&value.to_string())
+        .map_err(|_| DtoConversionError::InvalidUuid(value.to_string()))
 }
 
-fn naive_date_to_smithy<D: ToString>(date: D) -> DateOnly {
+fn smithy_uuid_from_domain(id: uuid::Uuid) -> smithy::Uuid {
+    smithy::Uuid::try_from(id.to_string())
+        .expect("domain uuid::Uuid should always map to smithy::Uuid")
+}
+
+fn naive_date_to_smithy<D: ToString>(date: D) -> smithy::DateOnly {
     let s = date.to_string();
-    DateOnly::try_from(s.clone())
+    smithy::DateOnly::try_from(s.clone())
         .expect("NaiveDate should always map to DateOnly successfully")
 }
 
-fn chrono_to_smithy_datetime(dt: chrono::DateTime<chrono::Utc>) -> SmithyDateTime {
-    SmithyDateTime::from_secs(dt.timestamp())
+fn chrono_to_smithy_datetime(dt: chrono::DateTime<chrono::Utc>) -> smithy_types::DateTime {
+    smithy_types::DateTime::from_secs(dt.timestamp())
 }
