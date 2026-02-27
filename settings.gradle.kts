@@ -15,10 +15,10 @@ pluginManagement {
 }
 
 // === Modules ===
-include("catalog-svc")
-include("catalog-svc:client")
-include("catalog-svc:smithy")
-include("catalog-svc:server")
+include("catalog-svc-smithy")
+include("catalog-svc-smithy:client")
+include("catalog-svc-smithy:smithy")
+include("catalog-svc-smithy:server")
 
 include("demo-notes2")
 include("demo-notes2:client")

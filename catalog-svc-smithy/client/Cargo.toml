@@ -1,0 +1,13 @@
+[package]
+name = "catalog-svc-client"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+# generated client SDK
+catalog_client_api = { path = "./build/smithyprojections/client/source/rust-client-codegen", features = ["behavior-version-latest"] }

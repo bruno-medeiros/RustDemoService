@@ -1,5 +1,5 @@
-use catalog_svc_utoipa::catalog::service::CatalogService;
-use catalog_svc_utoipa::http_server;
+use catalog_svc::catalog::service::CatalogService;
+use catalog_svc::http_server;
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]

@@ -1,5 +1,5 @@
 [package]
-name = "catalog-svc-utoipa"
+name = "catalog-svc"
 version = "0.1.0"
 edition = "2021"
 

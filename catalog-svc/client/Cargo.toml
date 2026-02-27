@@ -1,13 +1,16 @@
-[package]
-name = "catalog-svc-client"
+ [package]
+name = "demo_notes_client"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+license = "SPECIFY A LICENSE BEFORE PUBLISHING"
 
 [dependencies]
-clap = { workspace = true }
-tokio = { workspace = true }
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
+bytes = "1.9"
+chrono = { version = "0.4", default-features=false, features = ["serde"] }
+futures-core = "0.3"
+progenitor-client = "0.11.2"
+reqwest = { version = "0.12", default-features=false, features = ["json", "stream"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_urlencoded = "0.7"
+uuid = { version = "1.0", features = ["serde", "v4"] }
 
-# generated client SDK
-catalog_client_api = { path = "./build/smithyprojections/client/source/rust-client-codegen", features = ["behavior-version-latest"] }

@@ -6,9 +6,9 @@ members = [
     "commons",
     "snippets",
     "demo_svc",
-    "catalog-svc/server",
-    "catalog-svc/client",
-    "catalog-svc-utoipa/service",
+    "catalog-svc-smithy/server",
+    "catalog-svc-smithy/client",
+    "catalog-svc/service",
     "helloworld-tonic",
 ]
 
