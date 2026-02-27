@@ -10,7 +10,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use catalog_api::model::{CatalogItem, Uuid};
 use catalog_api::server::request::extension::Extension;
 use catalog_api::{error, input, output};
-use catalog_api::{error::ValidationException, types::DateTime};
+use catalog_api::{error::NotFoundError, types::DateTime};
 use sqlx::PgPool;
 
 use crate::server::dtos::{shape_to_create_output, shape_to_get_output, shape_to_update_output};
@@ -22,11 +22,10 @@ pub struct AppState {
     pub pg_pool: PgPool,
 }
 
-fn not_found_error() -> ValidationException {
-    ValidationException::builder()
-        .message("Resource not found".into())
-        .build()
-        .expect("ValidationException builder")
+fn not_found_error_404() -> NotFoundError {
+    NotFoundError {
+        message: Some("Resource not found".into()),
+    }
 }
 
 fn now() -> DateTime {
@@ -69,7 +68,7 @@ pub async fn get_catalog_item(
     let item = guard
         .get(input.item_id())
         .cloned()
-        .ok_or_else(|| error::GetCatalogItemError::from(not_found_error()))?;
+        .ok_or_else(|| error::GetCatalogItemError::from(not_found_error_404()))?;
     drop(guard);
     Ok(shape_to_get_output(item))
 }
@@ -83,7 +82,7 @@ pub async fn update_catalog_item(
     let mut guard = state.items.write().unwrap();
     let item = guard
         .get_mut(&item_id)
-        .ok_or_else(|| error::UpdateCatalogItemError::from(not_found_error()))?;
+        .ok_or_else(|| error::UpdateCatalogItemError::from(not_found_error_404()))?;
     let now = now();
     item.name = input.name;
     item.description = input.description;
@@ -106,7 +105,7 @@ pub async fn delete_catalog_item(
     if removed.is_some() {
         Ok(output::DeleteCatalogItemOutput {})
     } else {
-        Err(error::DeleteCatalogItemError::from(not_found_error()))
+        Err(error::DeleteCatalogItemError::from(not_found_error_404()))
     }
 }
 

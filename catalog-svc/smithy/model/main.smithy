@@ -22,9 +22,20 @@ service CatalogService {
 @http(method: "GET", uri: "/hello")
 @readonly
 operation HelloWorld {
+    input := {
+        @required
+        @httpQuery("name")
+        name: String
+    }
+
     output := {
         message: String
     }
+
+    errors: [
+        InternalServerError
+        ValidationException
+    ]
 }
 
 // ---------------------------------------------------------------------------
@@ -37,7 +48,7 @@ enum Category {
 }
 
 @mixin
-structure CatalogItemBodyMixin {
+structure CatalogItemBody {
     @required
     name: String
 
@@ -58,7 +69,7 @@ structure CatalogItemBodyMixin {
 }
 
 /// Catalog item representation
-structure CatalogItem with [CatalogItemBodyMixin] {
+structure CatalogItem with [CatalogItemBody] {
     @required
     itemId: Uuid
 
@@ -69,15 +80,16 @@ structure CatalogItem with [CatalogItemBodyMixin] {
     modifiedAt: Timestamp
 }
 
-/// Create input: catalog item body (server assigns itemId)
-structure CreateCatalogItemInput with [CatalogItemBodyMixin] {}
-
 @http(method: "POST", uri: "/catalog/items")
 operation CreateCatalogItem {
-    input: CreateCatalogItemInput
+    /// Create input: catalog item body (server assigns itemId)
+    input := with [CatalogItemBody] {}
+
     output: CatalogItem
+
     errors: [
         ValidationException
+        InternalServerError
     ]
 }
 
@@ -94,13 +106,15 @@ operation GetCatalogItem {
 
     errors: [
         ValidationException
+        NotFoundError
+        InternalServerError
     ]
 }
 
 @http(method: "POST", uri: "/catalog/items/{itemId}")
 operation UpdateCatalogItem {
     /// Update input: resource id plus catalog item body (same shape as CatalogItem)
-    input := with [CatalogItemBodyMixin] {
+    input := with [CatalogItemBody] {
         @required
         @httpLabel
         itemId: Uuid
@@ -109,7 +123,9 @@ operation UpdateCatalogItem {
     output: CatalogItem
 
     errors: [
+        NotFoundError
         ValidationException
+        InternalServerError
     ]
 }
 
@@ -125,7 +141,9 @@ operation DeleteCatalogItem {
     output: Unit
 
     errors: [
+        NotFoundError
         ValidationException
+        InternalServerError
     ]
 }
 
@@ -156,7 +174,7 @@ operation ListCatalogItems {
     output: ListCatalogItemsOutput
 
     errors: [
-        ValidationException
+        InternalServerError
     ]
 }
 
