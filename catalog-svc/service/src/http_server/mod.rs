@@ -1,7 +1,6 @@
 use axum::{
     extract::{Path, Query, State},
     http::StatusCode,
-    response::IntoResponse,
     routing::{get, post},
     Json, Router,
 };
@@ -13,7 +12,16 @@ use crate::catalog::api::{
     CatalogItem, CreateCatalogItemBody, ListCatalogItemsRequest, ListCatalogItemsResponse,
     UpdateCatalogItemBody,
 };
-use crate::catalog::service::CatalogService;
+use crate::catalog::service::{CatalogService, CatalogServiceError};
+
+impl From<CatalogServiceError> for StatusCode {
+    fn from(err: CatalogServiceError) -> StatusCode {
+        match err {
+            CatalogServiceError::ValidationError(_) => StatusCode::BAD_REQUEST,
+            CatalogServiceError::InternalError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+        }
+    }
+}
 
 /// OpenAPI spec for the Catalog API (used for client generation and Swagger UI).
 #[derive(OpenApi)]
@@ -73,9 +81,9 @@ pub fn router(catalog: CatalogService) -> Router {
 async fn create_catalog_item(
     State(state): State<AppState>,
     Json(body): Json<CreateCatalogItemBody>,
-) -> impl IntoResponse {
-    let item = state.catalog.create(body).await;
-    (StatusCode::CREATED, Json(item)).into_response()
+) -> Result<(StatusCode, Json<CatalogItem>), StatusCode> {
+    let item = state.catalog.create(body).await?;
+    Ok((StatusCode::CREATED, Json(item)))
 }
 
 #[utoipa::path(
@@ -87,9 +95,9 @@ async fn create_catalog_item(
 async fn list_catalog_items(
     State(state): State<AppState>,
     Query(req): Query<ListCatalogItemsRequest>,
-) -> impl IntoResponse {
-    let response = state.catalog.list(req).await;
-    Json(response)
+) -> Result<Json<ListCatalogItemsResponse>, StatusCode> {
+    let response = state.catalog.list(req).await?;
+    Ok(Json(response))
 }
 
 #[utoipa::path(
@@ -108,7 +116,7 @@ async fn get_catalog_item(
     state
         .catalog
         .get(item_id)
-        .await
+        .await?
         .map(Json)
         .ok_or(StatusCode::NOT_FOUND)
 }
@@ -131,7 +139,7 @@ async fn update_catalog_item(
     state
         .catalog
         .update(item_id, body)
-        .await
+        .await?
         .map(Json)
         .ok_or(StatusCode::NOT_FOUND)
 }
@@ -148,10 +156,11 @@ async fn update_catalog_item(
 async fn delete_catalog_item(
     State(state): State<AppState>,
     Path(item_id): Path<Uuid>,
-) -> StatusCode {
-    if state.catalog.delete(item_id).await {
-        StatusCode::NO_CONTENT
+) -> Result<StatusCode, StatusCode> {
+    let deleted = state.catalog.delete(item_id).await?;
+    if deleted {
+        Ok(StatusCode::NO_CONTENT)
     } else {
-        StatusCode::NOT_FOUND
+        Err(StatusCode::NOT_FOUND)
     }
 }
