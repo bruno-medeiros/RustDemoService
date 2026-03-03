@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-clap = { workspace = true }
 rust-demo-commons = { workspace = true, features = ["test-utils"] }
 hyper = { workspace = true }
 tokio = { workspace = true }
@@ -16,4 +15,4 @@ chrono = { workspace = true }
 catalog_api = { path = "./build/smithyprojections/server/source/rust-server-codegen" }
 
 # application service implementation
-catalog_svc = { path = "../../catalog-svc/service", package = "catalog-svc" }
+catalog-svc.workspace = true

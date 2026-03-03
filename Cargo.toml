@@ -8,8 +8,8 @@ members = [
     "demo_svc",
     "catalog-svc-smithy/server",
     "catalog-svc-smithy/client",
-    "catalog-svc/service",
-    "catalog-svc/client",
+    "catalog-svc/catalog-svc",
+    "catalog-svc/catalog-svc-client",
     "helloworld-tonic",
 ]
 
@@ -18,6 +18,8 @@ edition = "2024"
 
 [workspace.dependencies]
 rust-demo-commons = { path = "./commons" }
+catalog-svc-client = { path = "catalog-svc/catalog-svc-client" }
+catalog-svc = { path = "catalog-svc/catalog-svc" }
 
 anyhow = "1.0.94"
 async-trait = "0.1.85"

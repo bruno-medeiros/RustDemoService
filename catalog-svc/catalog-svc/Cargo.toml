@@ -24,8 +24,8 @@ utoipa-swagger-ui = { workspace = true }
 uuid = { workspace = true }
 
 [dev-dependencies]
-catalog-svc-client = { path = "../client" }
-catalog-svc = { path = ".", features = ["test-utils"] }
+catalog-svc-client = { workspace = true }
+catalog-svc = { workspace = true, features = ["test-utils"] }
 
 [[bin]]
 name = "dump-openapi"
