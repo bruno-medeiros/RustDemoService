@@ -1,3 +1,5 @@
+generate-smithy:
+	./gradlew build
 
 generate-openapi:
-	cargo run -p demo-notes --bin dump-openapi > demo-notes/openapi.json
+	./catalog-svc/generate-client.sh
