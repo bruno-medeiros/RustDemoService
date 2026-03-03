@@ -4,6 +4,7 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
+use rust_demo_commons::util::app;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 use uuid::Uuid;
@@ -69,6 +70,7 @@ pub fn router_with_state(state: AppState) -> Router {
         .with_state(state);
 
     Router::new()
+        .layer(app::http_trace_layer())
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .merge(api)
 }
