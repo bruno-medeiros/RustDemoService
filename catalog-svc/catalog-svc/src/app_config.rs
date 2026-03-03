@@ -13,6 +13,7 @@ pub struct HttpServerSettings {
 #[derive(Debug, Clone, Deserialize)]
 pub struct AppConfig {
     pub server: HttpServerSettings,
+    // TODO: secret string
     pub postgres: PostgresConfig,
 }
 

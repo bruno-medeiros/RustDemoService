@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use catalog_svc::config::AppConfig;
+use catalog_svc::app_config::AppConfig;
 use catalog_svc::server;
 use rust_demo_commons::util;
 

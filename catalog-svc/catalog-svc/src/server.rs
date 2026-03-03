@@ -5,7 +5,7 @@ use std::net::SocketAddr;
 use tokio::net::TcpListener;
 
 use crate::catalog::service::CatalogService;
-use crate::config::{create_pg_pool, AppConfig};
+use crate::app_config::{create_pg_pool, AppConfig};
 use crate::http_server;
 use crate::http_server::CatalogApp;
 
@@ -15,7 +15,14 @@ pub async fn build_app(app_config: &AppConfig) -> CatalogApp {
         .expect("failed to create PostgreSQL pool");
     tracing::info!("PostgreSQL pool initialized");
 
-    let catalog = CatalogService::new();
+    sqlx::migrate!("./migrations")
+        .run(&pg_pool)
+        .await
+        .expect("failed to run database migrations");
+    tracing::info!("Database migrations applied");
+
+    let catalog_repo = crate::catalog::repository::CatalogItemRepository::new(pg_pool.clone());
+    let catalog = CatalogService::with_repository(catalog_repo);
     let shutdown = tokio_util::sync::CancellationToken::new();
     CatalogApp {
         catalog,

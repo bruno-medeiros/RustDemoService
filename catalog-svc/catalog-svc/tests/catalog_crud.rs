@@ -2,7 +2,7 @@
 
 use std::time::Duration;
 
-use catalog_svc::config::AppConfig;
+use catalog_svc::app_config::AppConfig;
 use catalog_svc::server;
 use catalog_svc_client::types::{Category, CreateCatalogItemBody, UpdateCatalogItemBody};
 use catalog_svc_client::Client;

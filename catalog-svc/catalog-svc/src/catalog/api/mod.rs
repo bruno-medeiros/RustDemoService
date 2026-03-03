@@ -1,11 +1,14 @@
 use chrono::{DateTime, NaiveDate, Utc};
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
+use strum::{Display, EnumString};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
 /// Catalog item category.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, ToSchema, Display, EnumString)]
 #[serde(rename_all = "PascalCase")]
+#[strum(serialize_all = "PascalCase")]
 pub enum Category {
     Books,
     Electronics,
@@ -23,8 +26,9 @@ pub struct CatalogItem {
     /// Date with day resolution only (YYYY-MM-DD).
     pub date: NaiveDate,
     pub brand: Option<String>,
-    /// Price as decimal string (e.g. "19.99").
-    pub price: String,
+    /// Price (fixed-point decimal, e.g. 19.99). Serializes in JSON as string.
+    #[schema(value_type = String, example = "19.99")]
+    pub price: Decimal,
     pub created_at: DateTime<Utc>,
     pub modified_at: DateTime<Utc>,
 }
@@ -41,7 +45,8 @@ pub struct CreateCatalogItemBody {
     /// Date with day resolution only (YYYY-MM-DD).
     pub date: String,
     pub brand: Option<String>,
-    pub price: String,
+    #[schema(value_type = String, example = "19.99")]
+    pub price: Decimal,
 }
 
 /// Body for updating a catalog item (same fields as create, except item_id).
@@ -53,7 +58,8 @@ pub struct UpdateCatalogItemBody {
     pub category: Category,
     pub date: String,
     pub brand: Option<String>,
-    pub price: String,
+    #[schema(value_type = String, example = "19.99")]
+    pub price: Decimal,
 }
 
 /// Query parameters for the list catalog items endpoint.
