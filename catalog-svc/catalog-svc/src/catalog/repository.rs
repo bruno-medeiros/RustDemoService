@@ -1,10 +1,46 @@
 //! SQL repository for [CatalogItem] CRUD operations.
 
-use sqlx::{PgPool, Row};
+use chrono::{DateTime, NaiveDate, Utc};
+use rust_decimal::Decimal;
+use sqlx::{FromRow, PgPool};
 use thiserror::Error;
 use uuid::Uuid;
 
 use crate::catalog::api::{CatalogItem, Category};
+
+/// Row type for mapping SELECT results from `catalog_items` into [CatalogItem].
+#[derive(FromRow)]
+struct CatalogItemRow {
+    item_id: Uuid,
+    name: String,
+    description: String,
+    category: String,
+    date: NaiveDate,
+    brand: Option<String>,
+    price: Decimal,
+    created_at: DateTime<Utc>,
+    modified_at: DateTime<Utc>,
+}
+
+impl CatalogItemRow {
+    fn into_catalog_item(self) -> Result<CatalogItem, RepositoryError> {
+        let category = self
+            .category
+            .parse::<Category>()
+            .map_err(|_| RepositoryError::InvalidCategory(self.category.clone()))?;
+        Ok(CatalogItem {
+            item_id: self.item_id,
+            name: self.name,
+            description: self.description,
+            category,
+            date: self.date,
+            brand: self.brand,
+            price: self.price,
+            created_at: self.created_at,
+            modified_at: self.modified_at,
+        })
+    }
+}
 
 /// Errors from [CatalogItemRepository] operations.
 #[derive(Error, Debug)]
@@ -63,7 +99,7 @@ impl CatalogItemRepository {
 
     /// Fetch a catalog item by id.
     pub async fn get(&self, item_id: Uuid) -> Result<Option<CatalogItem>, RepositoryError> {
-        let row = sqlx::query(
+        let row = sqlx::query_as::<_, CatalogItemRow>(
             r#"
             SELECT
                 item_id,
@@ -83,7 +119,7 @@ impl CatalogItemRepository {
         .fetch_optional(&self.pool)
         .await?;
 
-        row.map(|r| row_to_catalog_item(&r)).transpose()
+        row.map(CatalogItemRow::into_catalog_item).transpose()
     }
 
     /// List catalog items with limit and offset. Returns (items, next_offset) where next_offset is
@@ -93,7 +129,7 @@ impl CatalogItemRepository {
         limit: i64,
         offset: i64,
     ) -> Result<(Vec<CatalogItem>, Option<i64>), RepositoryError> {
-        let rows = sqlx::query(
+        let rows = sqlx::query_as::<_, CatalogItemRow>(
             r#"
             SELECT
                 item_id,
@@ -117,7 +153,11 @@ impl CatalogItemRepository {
 
         let has_more = rows.len() as i64 > limit;
         let take = if has_more { limit as usize } else { rows.len() };
-        let items: Result<Vec<_>, _> = rows.iter().take(take).map(row_to_catalog_item).collect();
+        let items: Result<Vec<_>, _> = rows
+            .into_iter()
+            .take(take)
+            .map(CatalogItemRow::into_catalog_item)
+            .collect();
         let items = items?;
         let next_offset = if has_more { Some(offset + limit) } else { None };
         Ok((items, next_offset))
@@ -165,22 +205,4 @@ impl CatalogItemRepository {
         .await?;
         Ok(result.rows_affected() > 0)
     }
-}
-
-fn row_to_catalog_item(row: &sqlx::postgres::PgRow) -> Result<CatalogItem, RepositoryError> {
-    let category: String = row.try_get("category")?;
-    let category = category
-        .parse::<Category>()
-        .map_err(|_| RepositoryError::InvalidCategory(category.clone()))?;
-    Ok(CatalogItem {
-        item_id: row.try_get("item_id")?,
-        name: row.try_get("name")?,
-        description: row.try_get("description")?,
-        category,
-        date: row.try_get("date")?,
-        brand: row.try_get("brand")?,
-        price: row.try_get("price")?,
-        created_at: row.try_get("created_at")?,
-        modified_at: row.try_get("modified_at")?,
-    })
 }
