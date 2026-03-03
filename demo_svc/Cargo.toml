@@ -22,8 +22,7 @@ uuid.workspace = true
 rust-demo-commons = { path = "../commons" }
 
 
-axum = "0.7.9"
-axum-macros = "0.5.0"
+axum = { workspace = true }
 tower = "0.5.2"
 
 tokio-postgres = "0.7.12"
