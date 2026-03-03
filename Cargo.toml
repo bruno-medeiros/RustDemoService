@@ -9,6 +9,7 @@ members = [
     "catalog-svc-smithy/server",
     "catalog-svc-smithy/client",
     "catalog-svc/service",
+    "catalog-svc/client",
     "helloworld-tonic",
 ]
 

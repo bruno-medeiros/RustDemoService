@@ -9,7 +9,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 OPENAPI_JSON="$SCRIPT_DIR/openapi.json"
 OPENAPI_30_JSON="$SCRIPT_DIR/openapi30.json"
-CLIENT_DIR="$SCRIPT_DIR/client"
 PACKAGE_NAME="catalog-svc"
 
 # 1. Emit OpenAPI spec (run dump-openapi from workspace root)
@@ -34,13 +33,3 @@ jq '
 ' "$OPENAPI_JSON" > "$OPENAPI_30_JSON"
 echo "Wrote OpenAPI 3.0 spec to $OPENAPI_30_JSON"
 
-# 3. Generate client with progenitor
-if ! command -v cargo-progenitor &>/dev/null; then
-  echo "cargo-progenitor not found. Install with: cargo install cargo-progenitor"
-  exit 1
-fi
-
-mkdir -p "$CLIENT_DIR"
-cargo progenitor -i "$OPENAPI_30_JSON" -o "$CLIENT_DIR" -n ${PACKAGE_NAME}-client -v 0.1.0
- 
-echo "Client generated in $CLIENT_DIR"
