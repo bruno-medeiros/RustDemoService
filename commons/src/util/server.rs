@@ -1,5 +1,8 @@
 //! Application lifecycle utilities.
 
+use std::time::Duration;
+
+use tokio_util::sync::CancellationToken;
 use tower_http::{
     trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer},
     LatencyUnit,
@@ -56,4 +59,29 @@ pub async fn shutdown_signal() {
         _ = terminate => {},
     }
     tracing::info!("Shutdown signal received, draining connections");
+}
+
+/// Wait for an OS shutdown signal, cancel the given token to initiate graceful shutdown, then
+/// await the server task with a bounded drain timeout.
+///
+/// Returns `Ok(())` on clean shutdown or timeout (timeout is logged as a warning).
+/// Propagates server IO errors and re-panics if the server task panicked.
+pub async fn graceful_shutdown(
+    shutdown: CancellationToken,
+    server_handle: tokio::task::JoinHandle<std::io::Result<()>>,
+    drain_timeout: Duration,
+) -> anyhow::Result<()> {
+    shutdown_signal().await;
+    shutdown.cancel();
+
+    match tokio::time::timeout(drain_timeout, server_handle).await {
+        Ok(Ok(Ok(()))) => tracing::info!("Server shut down gracefully"),
+        Ok(Ok(Err(e))) => return Err(e.into()),
+        Ok(Err(e)) => std::panic::resume_unwind(e.into_panic()),
+        Err(_) => tracing::warn!(
+            "Graceful drain timed out after {}s, forcing exit",
+            drain_timeout.as_secs()
+        ),
+    }
+    Ok(())
 }

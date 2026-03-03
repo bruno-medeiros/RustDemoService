@@ -1,11 +1,14 @@
+use std::time::Duration;
+
 use catalog_svc::server;
-use rust_demo_commons::util::tracing;
+use rust_demo_commons::util;
+
+const DRAIN_TIMEOUT: Duration = Duration::from_secs(30);
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    tracing::init();
+    util::tracing::init_tracing();
 
-    let (_state, handle, _addr) = server::start_service_and_serve(3030).await?;
-    handle.await.expect("server task panicked")?;
-    Ok(())
+    let (state, handle, _addr) = server::start_service_and_serve(3030).await?;
+    util::server::graceful_shutdown(state.server_shutdown, handle, DRAIN_TIMEOUT).await
 }

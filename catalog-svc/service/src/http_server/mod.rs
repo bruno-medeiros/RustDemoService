@@ -4,7 +4,7 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
-use rust_demo_commons::util::app;
+use rust_demo_commons::util::server;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 use uuid::Uuid;
@@ -44,14 +44,17 @@ impl From<CatalogServiceError> for StatusCode {
 )]
 pub struct ApiDoc;
 
-/// Shared app state: the catalog service.
 #[derive(Clone)]
 pub struct AppState {
+    pub server_shutdown: tokio_util::sync::CancellationToken,
     pub catalog: CatalogService,
 }
 
 pub fn router(catalog: CatalogService) -> Router {
-    router_with_state(AppState { catalog })
+    router_with_state(AppState {
+        catalog,
+        server_shutdown: tokio_util::sync::CancellationToken::new(),
+    })
 }
 
 /// Build the API router with the given shared state. Use this when you need to keep a copy of [AppState].
@@ -70,7 +73,7 @@ pub fn router_with_state(state: AppState) -> Router {
         .with_state(state);
 
     Router::new()
-        .layer(app::http_trace_layer())
+        .layer(server::http_trace_layer())
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .merge(api)
 }
