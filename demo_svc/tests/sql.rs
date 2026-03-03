@@ -4,7 +4,7 @@ use tokio_postgres::NoTls;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 async fn tokio_postgres_example() -> Result<()> {
-    test_commons::init_logging();
+    tests::init_logging();
 
     let conn_url = std::env::var("DATABASE_URL")?;
 
@@ -28,13 +28,13 @@ async fn tokio_postgres_example() -> Result<()> {
     Ok(())
 }
 
-use rust_demo_commons::test_commons;
+use rust_demo_commons::util::tests;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions, PgRow};
 
 // #[tokio::test(flavor = "multi_thread", worker_threads = 10)]
 #[tokio::test]
 async fn sqlx_example() -> Result<()> {
-    test_commons::init_logging();
+    tests::init_logging();
 
     let conn_url = std::env::var("DATABASE_URL")?;
 

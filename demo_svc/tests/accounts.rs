@@ -8,13 +8,13 @@ use rust_demo_app::accounts::service::SqlAccountsService;
 use rust_demo_app::accounts::webapp;
 use rust_demo_app::accounts::webclient::AccountsServiceClient;
 use rust_demo_app::app_util::{AppControl, AppStarter};
-use rust_demo_commons::test_commons;
+use rust_demo_commons::util::tests;
 use sqlx::postgres::PgPoolOptions;
 use tracing::info;
 
 #[tokio::test]
 async fn accounts_it() -> Result<()> {
-    test_commons::init_logging();
+    tests::init_logging();
 
     let conn_url = std::env::var("DATABASE_URL")?;
 
@@ -33,7 +33,7 @@ async fn accounts_it() -> Result<()> {
 
 #[tokio::test]
 async fn accounts_webapp() -> Result<()> {
-    test_commons::init_logging();
+    tests::init_logging();
 
     let conn_url = std::env::var("DATABASE_URL")?;
 

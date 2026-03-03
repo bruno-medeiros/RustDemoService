@@ -10,7 +10,7 @@ use rdkafka::message::{Header, Headers, OwnedHeaders};
 use rdkafka::producer::{FutureProducer, FutureRecord};
 use rdkafka::util::get_rdkafka_version;
 use rdkafka::{ClientConfig, ClientContext, Message, TopicPartitionList};
-use rust_demo_commons::test_commons;
+use rust_demo_commons::util::tests;
 use tracing::{debug, info, warn};
 
 fn create_common_client_config(brokers: &str) -> ClientConfig {
@@ -25,7 +25,7 @@ fn create_common_client_config(brokers: &str) -> ClientConfig {
 
 #[tokio::test]
 async fn kakfa_simple_example() -> Result<()> {
-    test_commons::init_logging();
+    tests::init_logging();
 
     debug!("dummy");
 

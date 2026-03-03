@@ -1,0 +1,32 @@
+use std::sync::Once;
+
+use time::macros::format_description;
+use time::UtcOffset;
+use tracing_subscriber::filter::LevelFilter;
+use tracing_subscriber::fmt::time::OffsetTime;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
+use tracing_subscriber::EnvFilter;
+
+static INIT: Once = Once::new();
+
+pub fn init_logging() {
+    INIT.call_once(|| {
+        let offset = UtcOffset::current_local_offset().expect("should get local offset!");
+        let timer = OffsetTime::new(
+            offset,
+            format_description!("[hour]:[minute]:[second].[subsecond digits:6]"),
+        );
+        let format = tracing_subscriber::fmt::layer().with_timer(timer);
+
+        let filter = EnvFilter::builder()
+            .with_default_directive(LevelFilter::INFO.into())
+            .from_env()
+            .unwrap();
+
+        tracing_subscriber::registry()
+            .with(format)
+            .with(filter)
+            .init();
+    });
+}
