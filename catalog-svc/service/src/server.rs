@@ -21,8 +21,9 @@ pub async fn start_service_and_serve(
     SocketAddr,
 )> {
     let catalog = CatalogService::new();
-    let app_state = http_server::AppState { catalog };
-    let app = http_server::router_with_state(app_state.clone());
+    let app_state = AppState { catalog };
+    let app = http_server::router_with_state(app_state.clone())
+        .layer(rust_demo_commons::util::app::http_trace_layer());
     let listener = TcpListener::bind(("0.0.0.0", port)).await?;
     let addr = listener.local_addr()?;
     tracing::info!("Catalog API listening on {}", addr);

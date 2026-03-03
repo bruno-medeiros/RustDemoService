@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = { workspace = true }
-rust-demo-commons = { path = "../../commons" }
+rust-demo-commons = { path = "../../commons", features = ["test-utils"] }
 thiserror = { workspace = true }
 axum = { workspace = true }
 chrono = { workspace = true }
