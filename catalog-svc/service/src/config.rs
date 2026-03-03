@@ -5,7 +5,14 @@ use serde::Deserialize;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 #[derive(Debug, Clone, Deserialize)]
+pub struct HttpServerSettings {
+    pub host: String,
+    pub port: u16,
+}
+
+#[derive(Debug, Clone, Deserialize)]
 pub struct AppConfig {
+    pub server: HttpServerSettings,
     pub postgres: PostgresConfig,
 }
 
@@ -18,6 +25,11 @@ impl AppConfig {
             .add_source(Environment::with_prefix("APP").separator("__"));
         let config = builder.build()?;
         config.try_deserialize::<AppConfig>()
+    }
+
+    #[cfg(feature = "test-utils")]
+    pub fn load_tests() -> Self {
+        Self::load().expect("failed to load config")
     }
 }
 

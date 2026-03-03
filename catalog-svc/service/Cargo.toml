@@ -3,6 +3,9 @@ name = "catalog-svc"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+test-utils = []
+
 [dependencies]
 anyhow = { workspace = true }
 rust-demo-commons = { path = "../../commons", features = ["test-utils"] }
@@ -22,6 +25,7 @@ uuid = { workspace = true }
 
 [dev-dependencies]
 catalog-svc-client = { path = "../client" }
+catalog-svc = { path = ".", features = ["test-utils"] }
 
 [[bin]]
 name = "dump-openapi"

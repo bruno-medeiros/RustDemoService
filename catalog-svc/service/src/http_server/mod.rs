@@ -5,6 +5,7 @@ use axum::{
     Json, Router,
 };
 use rust_demo_commons::util::server;
+use sqlx::Postgres;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 use uuid::Uuid;
@@ -45,20 +46,14 @@ impl From<CatalogServiceError> for StatusCode {
 pub struct ApiDoc;
 
 #[derive(Clone)]
-pub struct AppState {
+pub struct CatalogApp {
     pub server_shutdown: tokio_util::sync::CancellationToken,
+    pub pg_pool: sqlx::Pool<Postgres>,
     pub catalog: CatalogService,
 }
 
-pub fn router(catalog: CatalogService) -> Router {
-    router_with_state(AppState {
-        catalog,
-        server_shutdown: tokio_util::sync::CancellationToken::new(),
-    })
-}
-
-/// Build the API router with the given shared state. Use this when you need to keep a copy of [AppState].
-pub fn router_with_state(state: AppState) -> Router {
+/// Build the API router with the given shared state. Use this when you need to keep a copy of [CatalogApp].
+pub fn router_with_state(state: CatalogApp) -> Router {
     let api = Router::new()
         .route(
             "/catalog/items",
@@ -88,7 +83,7 @@ pub fn router_with_state(state: AppState) -> Router {
     )
 )]
 async fn create_catalog_item(
-    State(state): State<AppState>,
+    State(state): State<CatalogApp>,
     Json(body): Json<CreateCatalogItemBody>,
 ) -> Result<(StatusCode, Json<CatalogItem>), StatusCode> {
     let item = state.catalog.create(body).await?;
@@ -102,7 +97,7 @@ async fn create_catalog_item(
     responses((status = 200, description = "List of catalog items", body = ListCatalogItemsResponse)),
 )]
 async fn list_catalog_items(
-    State(state): State<AppState>,
+    State(state): State<CatalogApp>,
     Query(req): Query<ListCatalogItemsRequest>,
 ) -> Result<Json<ListCatalogItemsResponse>, StatusCode> {
     let response = state.catalog.list(req).await?;
@@ -119,7 +114,7 @@ async fn list_catalog_items(
     )
 )]
 async fn get_catalog_item(
-    State(state): State<AppState>,
+    State(state): State<CatalogApp>,
     Path(item_id): Path<Uuid>,
 ) -> Result<Json<CatalogItem>, StatusCode> {
     state
@@ -141,7 +136,7 @@ async fn get_catalog_item(
     )
 )]
 async fn update_catalog_item(
-    State(state): State<AppState>,
+    State(state): State<CatalogApp>,
     Path(item_id): Path<Uuid>,
     Json(body): Json<UpdateCatalogItemBody>,
 ) -> Result<Json<CatalogItem>, StatusCode> {
@@ -163,7 +158,7 @@ async fn update_catalog_item(
     )
 )]
 async fn delete_catalog_item(
-    State(state): State<AppState>,
+    State(state): State<CatalogApp>,
     Path(item_id): Path<Uuid>,
 ) -> Result<StatusCode, StatusCode> {
     let deleted = state.catalog.delete(item_id).await?;

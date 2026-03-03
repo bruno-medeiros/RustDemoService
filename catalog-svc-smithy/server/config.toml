@@ -1,7 +1,0 @@
-# PostgreSQL connection (matches docker-compose.yml db service)
-[postgres]
-host = "localhost"
-port = 5432
-user = "postgres"
-password = "mypassword"
-database = "postgres"

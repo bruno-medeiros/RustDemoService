@@ -598,6 +598,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "axum",
+ "catalog-svc",
  "catalog-svc-client",
  "chrono",
  "config",
@@ -647,13 +648,10 @@ dependencies = [
  "catalog_api",
  "chrono",
  "clap",
- "config",
  "hyper 0.14.32",
- "serde",
- "sqlx",
+ "rust-demo-commons",
  "tokio",
  "tracing",
- "tracing-subscriber",
  "uuid",
 ]
 

@@ -2,23 +2,26 @@
 
 use std::time::Duration;
 
+use catalog_svc::config::AppConfig;
 use catalog_svc::server;
 use catalog_svc_client::types::{Category, CreateCatalogItemBody, UpdateCatalogItemBody};
 use catalog_svc_client::Client;
 use rust_demo_commons::util::tests;
 
-const TEST_PORT: u16 = 3031;
-
 #[tokio::test]
 async fn catalog_crud() {
     tests::init_logging();
 
-    let (_state, _handle, _addr) = server::start_service_and_serve(TEST_PORT)
+    let mut app_config = AppConfig::load_tests();
+    let app_state = server::build_app(&app_config).await;
+    app_config.server.port = 3031;
+
+    let (state, _handle, _addr) = server::start_service_and_serve(app_state, app_config)
         .await
         .expect("bind");
     tokio::time::sleep(Duration::from_millis(100)).await;
 
-    let base = format!("http://127.0.0.1:{}", TEST_PORT);
+    let base = format!("http://127.0.0.1:{}", 3031);
     let client = Client::new(&base);
 
     // Create
@@ -87,4 +90,6 @@ async fn catalog_crud() {
     // Get after delete -> 404
     let get_after = client.get_catalog_item(&item_id).await;
     assert!(get_after.is_err());
+
+    state.server_shutdown.cancel();
 }

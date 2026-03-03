@@ -10,22 +10,18 @@ use catalog_api::{error, input, output};
 use catalog_svc::catalog::api::{
     CreateCatalogItemBody, ListCatalogItemsRequest, ListCatalogItemsResponse, UpdateCatalogItemBody,
 };
-use catalog_svc::catalog::service::CatalogService;
+use catalog_svc::http_server::CatalogApp;
 
 use crate::server::dtos::{
     map_category_from_smithy, service_item_to_create_output, service_item_to_get_output,
     service_item_to_update_output, service_items_to_smithy_items, uuid_from_smithy,
 };
 use crate::server::errors::{
-    catalog_error_to_create, catalog_error_to_delete, catalog_error_to_get,
-    catalog_error_to_list, catalog_error_to_update, dto_internal, not_found_error_404,
+    catalog_error_to_create, catalog_error_to_delete, catalog_error_to_get, catalog_error_to_list,
+    catalog_error_to_update, dto_internal, not_found_error_404,
 };
 
-/// Shared application state holding the catalog domain service.
-#[derive(Clone)]
-pub struct AppState {
-    pub catalog: CatalogService,
-}
+type AppState = CatalogApp;
 
 /// Handler for CreateCatalogItem: delegates to the domain CatalogService.
 pub async fn create_catalog_item(
@@ -41,7 +37,11 @@ pub async fn create_catalog_item(
         price: input.price,
     };
 
-    let item = state.catalog.create(body).await.map_err(catalog_error_to_create)?;
+    let item = state
+        .catalog
+        .create(body)
+        .await
+        .map_err(catalog_error_to_create)?;
     Ok(service_item_to_create_output(item))
 }
 
@@ -92,7 +92,11 @@ pub async fn delete_catalog_item(
 ) -> Result<output::DeleteCatalogItemOutput, error::DeleteCatalogItemError> {
     let item_id: uuid::Uuid = uuid_from_smithy(input.item_id()).map_err(dto_internal)?;
 
-    let deleted = state.catalog.delete(item_id).await.map_err(catalog_error_to_delete)?;
+    let deleted = state
+        .catalog
+        .delete(item_id)
+        .await
+        .map_err(catalog_error_to_delete)?;
     if deleted {
         Ok(output::DeleteCatalogItemOutput {})
     } else {

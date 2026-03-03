@@ -16,6 +16,8 @@ members = [
 edition = "2024"
 
 [workspace.dependencies]
+rust-demo-commons = { path = "./commons" }
+
 anyhow = "1.0.94"
 async-trait = "0.1.85"
 axum = "0.8"
