@@ -1,0 +1,15 @@
+---
+description: Regenerate catalog client when server API or routes change
+globs: catalog-svc/service/Cargo.toml
+alwaysApply: false
+---
+
+# Regenerate client when catalog-svc API changes
+
+When server routes or the server API in `catalog-svc/service` change, regenerate the client from the repository root:
+
+```bash
+./catalog-svc/generate-client.sh
+```
+
+Prerequisites: `cargo-progenitor`, `jq` (see script comments).

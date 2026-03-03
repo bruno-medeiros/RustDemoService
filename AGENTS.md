@@ -27,3 +27,12 @@ use catalog_svc::catalog::api::{CatalogItem as ServiceCatalogItem, Category as S
 ```
 
 This keeps service/domain types under their original names and makes Smithy types clearly scoped (e.g. `smithy::CatalogItem`, `smithy_types::DateTime`) without inventing new type names.
+
+## Generated client code (`catalog-svc/client/`)
+
+- **Do not modify generated code** in `catalog-svc/client/`. That code is produced by the client generator and manual edits will be overwritten.
+- **When server routes or the server API in `catalog-svc/service/` change**, regenerate the client instead of editing it by hand. From the repository root, run:
+  ```bash
+  ./catalog-svc/generate-client.sh
+  ```
+  Prerequisites: `cargo-progenitor`, `jq` (see script comments).

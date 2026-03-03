@@ -1,0 +1,9 @@
+---
+description: Do not edit generated catalog client
+globs: catalog-svc/client/**/*
+alwaysApply: false
+---
+
+# Catalog client is generated — do not edit
+
+Code under `catalog-svc/client/` is **generated** (e.g. by progenitor from the OpenAPI spec). Do not modify it by hand; changes will be overwritten on the next generation.
