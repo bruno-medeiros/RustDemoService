@@ -19,7 +19,7 @@ pub fn not_found_error_404() -> error::NotFoundError {
 
 fn catalog_error_to_internal(err: CatalogServiceError) -> error::InternalServerError {
     error::InternalServerError {
-        message: Some(err.to_string().into()),
+        message: Some(err.to_string()),
     }
 }
 

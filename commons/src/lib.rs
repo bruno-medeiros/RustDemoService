@@ -1,3 +1,5 @@
+pub mod util;
+
 #[cfg(feature = "test-utils")]
 pub mod test_commons {
     use std::sync::Once;

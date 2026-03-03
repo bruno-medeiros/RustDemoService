@@ -50,7 +50,11 @@ pub struct AppState {
 }
 
 pub fn router(catalog: CatalogService) -> Router {
-    let state = AppState { catalog };
+    router_with_state(AppState { catalog })
+}
+
+/// Build the API router with the given shared state. Use this when you need to keep a copy of [AppState].
+pub fn router_with_state(state: AppState) -> Router {
     let api = Router::new()
         .route(
             "/catalog/items",

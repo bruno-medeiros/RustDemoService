@@ -10,10 +10,11 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 OPENAPI_JSON="$SCRIPT_DIR/openapi.json"
 OPENAPI_30_JSON="$SCRIPT_DIR/openapi30.json"
 CLIENT_DIR="$SCRIPT_DIR/client"
+PACKAGE_NAME="catalog-svc"
 
 # 1. Emit OpenAPI spec (run dump-openapi from workspace root)
 cd "$REPO_ROOT"
-cargo run -p demo-notes --bin dump-openapi > "$OPENAPI_JSON"
+cargo run -p $PACKAGE_NAME --bin dump-openapi > "$OPENAPI_JSON"
 echo "Wrote OpenAPI spec to $OPENAPI_JSON"
 
 # 2. Convert 3.1 → 3.0 for progenitor (openapiv3 only supports 3.0.x)
@@ -40,6 +41,6 @@ if ! command -v cargo-progenitor &>/dev/null; then
 fi
 
 mkdir -p "$CLIENT_DIR"
-cargo progenitor -i "$OPENAPI_30_JSON" -o "$CLIENT_DIR" -n demo_notes_client -v 0.1.0
-
+cargo progenitor -i "$OPENAPI_30_JSON" -o "$CLIENT_DIR" -n ${PACKAGE_NAME}-client -v 0.1.0
+ 
 echo "Client generated in $CLIENT_DIR"

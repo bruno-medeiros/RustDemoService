@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = { workspace = true }
+rust-demo-commons = { path = "../../commons" }
 thiserror = { workspace = true }
 axum = { workspace = true }
 chrono = { workspace = true }
@@ -18,6 +19,9 @@ tracing-subscriber = { workspace = true }
 utoipa = { workspace = true }
 utoipa-swagger-ui = { workspace = true }
 uuid = { workspace = true }
+
+[dev-dependencies]
+catalog-svc-client = { path = "../client" }
 
 [[bin]]
 name = "dump-openapi"

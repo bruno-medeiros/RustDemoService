@@ -1,5 +1,4 @@
-use catalog_svc::catalog::service::CatalogService;
-use catalog_svc::http_server;
+use catalog_svc::server;
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
@@ -8,12 +7,7 @@ async fn main() -> anyhow::Result<()> {
         .with_env_filter(EnvFilter::from_default_env().add_directive(tracing::Level::INFO.into()))
         .init();
 
-    let catalog = CatalogService::new();
-    let app = http_server::router(catalog);
-
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3030").await?;
-    tracing::info!("Catalog API listening on {}", listener.local_addr()?);
-    axum::serve(listener, app).await?;
-
+    let (_state, handle, _addr) = server::start_service_and_serve(3030).await?;
+    handle.await.expect("server task panicked")?;
     Ok(())
 }

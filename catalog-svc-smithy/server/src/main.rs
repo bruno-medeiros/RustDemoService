@@ -10,9 +10,9 @@ use catalog_api::server::{
 };
 use catalog_api::{CatalogService, CatalogServiceConfig};
 use catalog_svc::catalog::service::CatalogService as DomainCatalogService;
-use catalog_svc_server::config::{create_pg_pool, AppConfig};
-use catalog_svc_server::hello_world;
-use catalog_svc_server::server::{
+use catalog_svc_smithy_server::config::{create_pg_pool, AppConfig};
+use catalog_svc_smithy_server::hello_world;
+use catalog_svc_smithy_server::server::{
     AppState, create_catalog_item, delete_catalog_item, get_catalog_item, list_catalog_items,
     update_catalog_item,
 };

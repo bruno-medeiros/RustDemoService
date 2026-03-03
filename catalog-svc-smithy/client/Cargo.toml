@@ -1,5 +1,5 @@
 [package]
-name = "catalog-svc-client"
+name = "catalog-svc-smithy-client"
 version = "0.1.0"
 edition = "2024"
 

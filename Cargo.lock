@@ -655,8 +655,10 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "axum 0.7.9",
+ "catalog-svc-client",
  "chrono",
  "config",
+ "rust-demo-commons",
  "serde",
  "serde_json",
  "sqlx",
@@ -673,6 +675,20 @@ dependencies = [
 name = "catalog-svc-client"
 version = "0.1.0"
 dependencies = [
+ "bytes",
+ "chrono",
+ "futures-core",
+ "progenitor-client",
+ "reqwest",
+ "serde",
+ "serde_urlencoded",
+ "uuid",
+]
+
+[[package]]
+name = "catalog-svc-smithy-client"
+version = "0.1.0"
+dependencies = [
  "catalog_client_api",
  "clap",
  "tokio",
@@ -681,7 +697,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "catalog-svc-server"
+name = "catalog-svc-smithy-server"
 version = "0.1.0"
 dependencies = [
  "catalog-svc",
@@ -2710,6 +2726,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "progenitor-client"
+version = "0.11.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "71a0beb939758f229cbae70a4889c7c76a4ac0e90f0b1e7ae9b4636a927d1018"
+dependencies = [
+ "bytes",
+ "futures-core",
+ "percent-encoding",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "serde_urlencoded",
+]
+
+[[package]]
 name = "prost"
 version = "0.13.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2984,6 +3015,7 @@ dependencies = [
  "bytes",
  "encoding_rs",
  "futures-core",
+ "futures-util",
  "h2 0.4.13",
  "http 1.4.0",
  "http-body 1.0.1",
@@ -3008,12 +3040,14 @@ dependencies = [
  "tokio",
  "tokio-native-tls",
  "tokio-rustls 0.26.4",
+ "tokio-util",
  "tower 0.5.2",
  "tower-http 0.6.6",
  "tower-service",
  "url",
  "wasm-bindgen",
  "wasm-bindgen-futures",
+ "wasm-streams",
  "web-sys",
  "webpki-roots 1.0.1",
 ]
@@ -4597,6 +4631,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1a05d73b933a847d6cccdda8f838a22ff101ad9bf93e33684f39c1f5f0eece3d"
 dependencies = [
  "unicode-ident",
+]
+
+[[package]]
+name = "wasm-streams"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "15053d8d85c7eccdbefef60f06769760a563c7f0a9d6902a13d35c7800b0ad65"
+dependencies = [
+ "futures-util",
+ "js-sys",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]

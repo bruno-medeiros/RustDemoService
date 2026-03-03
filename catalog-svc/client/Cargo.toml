@@ -1,5 +1,5 @@
- [package]
-name = "demo_notes_client"
+[package]
+name = "catalog-svc-client"
 version = "0.1.0"
 edition = "2021"
 license = "SPECIFY A LICENSE BEFORE PUBLISHING"
