@@ -61,3 +61,11 @@ pub fn catalog_error_to_delete(err: CatalogServiceError) -> error::DeleteCatalog
 pub fn catalog_error_to_list(err: CatalogServiceError) -> error::ListCatalogItemsError {
     catalog_error_to_internal(err).into()
 }
+
+/// Maps a decimal parse error to a validation error (e.g. invalid price string).
+pub fn price_parse_to_validation(err: impl std::fmt::Display) -> error::ValidationException {
+    error::ValidationException {
+        message: format!("invalid price: {err}"),
+        field_list: None,
+    }
+}

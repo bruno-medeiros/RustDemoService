@@ -3,6 +3,7 @@
 pub mod dtos;
 mod errors;
 
+use std::str::FromStr;
 use std::sync::Arc;
 
 use catalog_api::server::request::extension::Extension;
@@ -11,6 +12,7 @@ use catalog_svc::catalog::api::{
     CreateCatalogItemBody, ListCatalogItemsRequest, ListCatalogItemsResponse, UpdateCatalogItemBody,
 };
 use catalog_svc::http_server::CatalogApp;
+use rust_decimal::Decimal;
 
 use crate::server::dtos::{
     map_category_from_smithy, service_item_to_create_output, service_item_to_get_output,
@@ -18,7 +20,7 @@ use crate::server::dtos::{
 };
 use crate::server::errors::{
     catalog_error_to_create, catalog_error_to_delete, catalog_error_to_get, catalog_error_to_list,
-    catalog_error_to_update, dto_internal, not_found_error_404,
+    catalog_error_to_update, dto_internal, not_found_error_404, price_parse_to_validation,
 };
 
 type AppState = CatalogApp;
@@ -28,13 +30,14 @@ pub async fn create_catalog_item(
     input: input::CreateCatalogItemInput,
     Extension(state): Extension<Arc<AppState>>,
 ) -> Result<output::CreateCatalogItemOutput, error::CreateCatalogItemError> {
+    let price = Decimal::from_str(&input.price).map_err(price_parse_to_validation)?;
     let body = CreateCatalogItemBody {
         name: input.name,
         description: input.description,
         category: map_category_from_smithy(input.category),
         date: input.date.to_string(),
         brand: input.brand,
-        price: input.price,
+        price,
     };
 
     let item = state
@@ -67,13 +70,14 @@ pub async fn update_catalog_item(
 ) -> Result<output::UpdateCatalogItemOutput, error::UpdateCatalogItemError> {
     let item_id: uuid::Uuid = uuid_from_smithy(&input.item_id).map_err(dto_internal)?;
 
+    let price = Decimal::from_str(&input.price).map_err(price_parse_to_validation)?;
     let body = UpdateCatalogItemBody {
         name: input.name,
         description: input.description,
         category: map_category_from_smithy(input.category),
         date: input.date.to_string(),
         brand: input.brand,
-        price: input.price,
+        price,
     };
 
     let item = state

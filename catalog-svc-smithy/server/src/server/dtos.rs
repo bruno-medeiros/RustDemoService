@@ -51,7 +51,7 @@ pub fn service_item_to_smithy_item(value: CatalogItem) -> smithy::CatalogItem {
         category: map_category_to_smithy(value.category),
         date,
         brand: value.brand,
-        price: value.price,
+        price: value.price.to_string(),
         item_id,
         created_at,
         modified_at,

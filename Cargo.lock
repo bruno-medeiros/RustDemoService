@@ -726,6 +726,7 @@ dependencies = [
  "chrono",
  "hyper 0.14.32",
  "rust-demo-commons",
+ "rust_decimal",
  "tokio",
  "tracing",
  "uuid",

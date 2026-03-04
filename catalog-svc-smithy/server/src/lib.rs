@@ -9,7 +9,7 @@ use catalog_api::server::layer::alb_health_check::AlbHealthCheckLayer;
 use catalog_api::server::plugin::{HttpPlugins, ModelPlugins};
 use catalog_api::server::request::request_id::ServerRequestIdProviderLayer;
 use catalog_api::{CatalogService, CatalogServiceConfig, error, input, output};
-use catalog_svc::config::HttpServerSettings;
+use catalog_svc::app_config::HttpServerSettings;
 use catalog_svc::http_server::CatalogApp;
 use hyper::StatusCode;
 
