@@ -5,7 +5,6 @@ resolver = "3"
 members = [
     "commons",
     "snippets",
-    "demo_svc",
     "catalog-svc-smithy/server",
     "catalog-svc-smithy/client",
     "catalog-svc/catalog-svc",

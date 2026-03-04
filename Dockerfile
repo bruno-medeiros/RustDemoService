@@ -51,10 +51,10 @@ COPY . .
 
 RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
     --mount=type=cache,target=/app/target,sharing=locked \
-    cargo build --release \
+    cargo build --release -p catalog-svc \
     # The target/ dir lives in a cache mount and won't survive to the next stage,
     # so copy the final binary out before the mount is released.
-    && cp target/release/rust-demo-app /app/rust-demo-app
+    && cp target/release/catalog-svc /app/catalog-svc-bin
 
 ###############################################################################
 # Stage 4 — runtime: minimal distroless image (~20 MB vs ~800 MB builder)
@@ -70,10 +70,10 @@ FROM gcr.io/distroless/cc-debian12 AS runtime
 # Principle of least privilege — distroless ships a `nonroot` user (uid 65532)
 USER nonroot:nonroot
 
-COPY --from=builder --chown=nonroot:nonroot /app/rust-demo-app /usr/local/bin/rust-demo-app
+COPY --from=builder --chown=nonroot:nonroot /app/catalog-svc-bin /usr/local/bin/catalog-svc
 
 # Expose whatever port your service listens on
 EXPOSE 8080
 
-ENTRYPOINT ["/usr/local/bin/rust-demo-app"]
+ENTRYPOINT ["/usr/local/bin/catalog-svc"]
 
