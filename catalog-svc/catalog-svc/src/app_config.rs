@@ -1,3 +1,4 @@
+use std::env;
 use std::time::Duration;
 
 use config::{Config, Environment, File};
@@ -19,10 +20,12 @@ pub struct AppConfig {
 
 impl AppConfig {
     /// Load application config from config file and environment.
-    /// File: `config.toml` (optional). Env: `APP__` prefix (e.g. `APP__POSTGRES__HOST`).
+    /// File: path from `CONFIG_FILE` env var, or `config.toml` if unset (optional).
+    /// Env: `APP__` prefix (e.g. `APP__POSTGRES__HOST`).
     pub fn load() -> Result<Self, config::ConfigError> {
+        let config_path = env::var("CONFIG_FILE").unwrap_or_else(|_| "config.toml".to_string());
         let builder = Config::builder()
-            .add_source(File::with_name("config.toml").required(false))
+            .add_source(File::with_name(&config_path).required(false))
             .add_source(Environment::with_prefix("APP").separator("__"));
         let config = builder.build()?;
         config.try_deserialize::<AppConfig>()
