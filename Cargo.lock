@@ -676,6 +676,7 @@ dependencies = [
  "catalog-svc-client",
  "chrono",
  "config",
+ "rdkafka",
  "rust-demo-commons",
  "rust_decimal",
  "serde",

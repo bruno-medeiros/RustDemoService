@@ -24,6 +24,7 @@ tracing = { workspace = true }
 utoipa = { workspace = true }
 utoipa-swagger-ui = { workspace = true }
 uuid = { workspace = true }
+rdkafka = { workspace = true }
 
 [dev-dependencies]
 catalog-svc-client = { workspace = true }
