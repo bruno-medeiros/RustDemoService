@@ -7,6 +7,10 @@ generate-smithy:
 generate-openapi:
 	./catalog-svc/generate-openapi.sh
 
+# Build frontend (Vite/React)
+build-frontend:
+	cd frontend && npm ci && npm run build
+
 # Recreate catalog-svc DB from scratch
 migrate-reset:
 	cd catalog-svc/catalog-svc && sqlx database reset -y --database-url "$(DATABASE_URL)"
