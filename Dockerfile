@@ -32,7 +32,7 @@ FROM chef AS builder
 # pkg-config         → used by several -sys crates to locate C libraries
 RUN apt-get update && apt-get install -y --no-install-recommends \
         protobuf-compiler \
-        cmake libss-dev \
+        cmake libssl-dev \
         pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
@@ -70,7 +70,7 @@ FROM gcr.io/distroless/cc-debian12 AS runtime
 # Principle of least privilege — distroless ships a `nonroot` user (uid 65532)
 USER nonroot:nonroot
 
-COPY --from=builder --chown=nonroot:nonroot /app/my-app /usr/local/bin/my-app
+COPY --from=builder --chown=nonroot:nonroot /app/rust-demo-app /usr/local/bin/rust-demo-app
 
 # Expose whatever port your service listens on
 EXPOSE 8080
