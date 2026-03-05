@@ -7,6 +7,10 @@ generate-smithy:
 generate-openapi:
 	./catalog-svc/generate-openapi.sh
 
+# Generate TypeScript client from OpenAPI spec (hey-api)
+generate-ts-client:
+	cd catalog-svc/catalog-client-ts && npm run generate
+
 # Build frontend (Vite/React)
 build-frontend:
 	cd frontend && npm ci && npm run build
