@@ -8,19 +8,37 @@ Learning project for Rust ecosystem and various related technologies:
 
   * `snippets` - various code snippets to illustrate Rust features and idioms
 
-### Development
-
-* Building project:
-    * Run `docker compose -f docker-compose.yml up -d` to start dependencies for integration tests.
-
-* Code Formatting: Run `cargo +nightly fmt -- --config-path=.rustfmt.toml`
-    * (Ideally configure this in the IDE to run on save or on commit)
-
-* Linting: `cargo clippy --all-targets -- --deny warnings`
-
-#### Notes:
+### Notes
 
 * For cross-crate test-only helpers, prefer a `test-utils` cargo feature (instead of `#[cfg(test)]`) so shared test code can be compiled and reused where needed. See: https://stackoverflow.com/questions/41700543/can-we-share-test-utilities-between-crates
 
-### TODO:
- Add notes on how to access openapi of `catalog-svc` and generate service
+#### Building
+
+
+* **TypeScript client** (from OpenAPI spec): `make generate-ts-client`
+* **OpenAPI spec** (from Rust server code): `make generate-openapi`
+* **Smithy types** (Gradle): `make generate-smithy`
+
+
+#### Code quality
+
+* Formatting: `cargo +nightly fmt -- --config-path=.rustfmt.toml`
+* Linting: `cargo clippy --all-targets -- --deny warnings`
+* Frontend lint: `cd frontend && npm run lint`
+
+
+#### Starting the app
+1. Start dependencies (Postgres, Kafka):
+   ```bash
+   docker compose -f docker-compose.yml up -d
+   ```
+2. Run the catalog service (listens on `http://localhost:3030`):
+   ```bash
+   cd catalog-svc/catalog-svc; cargo run -p catalog-svc --bin catalog-svc
+   ```
+
+1. Install dependencies and start the dev server:
+   ```bash
+   cd frontend && npm install && npm run dev
+   ```
+   The dev server starts at `http://localhost:5173` by default. It expects the backend to be running on port 3030.

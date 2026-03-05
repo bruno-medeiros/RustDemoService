@@ -81,6 +81,12 @@ async fn catalog_crud() {
     assert_eq!(updated_item.name, "Rust Book (2nd ed)");
     assert_eq!(updated_item.price, "54.99");
 
+    let created2 = client
+        .create_catalog_item(&create_body)
+        .await
+        .expect("create should succeed");
+    let item_id = created2.item_id;
+
     // Delete
     client
         .delete_catalog_item(&item_id)

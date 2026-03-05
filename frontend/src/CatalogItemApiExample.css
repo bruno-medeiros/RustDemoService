@@ -1,0 +1,83 @@
+.catalog-example {
+  width: 100%;
+  text-align: left;
+}
+
+.catalog-example h2 {
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+}
+
+.status {
+  color: #888;
+  font-size: 0.95rem;
+}
+
+.status.error {
+  color: #e53e3e;
+}
+
+.catalog-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.catalog-table th {
+  padding: 0.6rem 0.8rem;
+  border-bottom: 2px solid #444;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.catalog-table td {
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid #333;
+  vertical-align: top;
+}
+
+.catalog-table tbody tr:hover {
+  background: rgba(100, 108, 255, 0.08);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15em 0.5em;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: #646cff22;
+  color: #646cff;
+}
+
+.price {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.date {
+  white-space: nowrap;
+  color: #888;
+}
+
+.description {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-color-scheme: light) {
+  .catalog-table th {
+    border-bottom-color: #ccc;
+  }
+
+  .catalog-table td {
+    border-bottom-color: #e2e2e2;
+  }
+
+  .catalog-table tbody tr:hover {
+    background: rgba(100, 108, 255, 0.05);
+  }
+}
