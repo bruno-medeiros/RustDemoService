@@ -16,5 +16,5 @@ build-frontend:
 	cd frontend && npm ci && npm run build
 
 # Recreate catalog-svc DB from scratch
-migrate-reset:
+database-reset:
 	cd catalog-svc/catalog-svc && sqlx database reset -y --database-url "$(DATABASE_URL)"

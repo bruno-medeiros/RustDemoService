@@ -6,7 +6,9 @@ use utoipa::ToSchema;
 use uuid::Uuid;
 
 /// Catalog item category.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, ToSchema, Display, EnumString)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, ToSchema, Display, EnumString,
+)]
 #[serde(rename_all = "PascalCase")]
 #[strum(serialize_all = "PascalCase")]
 pub enum Category {
@@ -14,8 +16,8 @@ pub enum Category {
     Electronics,
 }
 
-/// Catalog item: product with id, metadata, and server-set timestamps.
-/// created_at and modified_at are set by the service; exposed in responses only.
+/// Catalog item: product with id, metadata, and server-set UTC timestamps.
+/// exposed in responses only.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct CatalogItem {
