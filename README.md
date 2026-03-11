@@ -42,3 +42,9 @@ Learning project for Rust ecosystem and various related technologies:
    cd frontend && npm install && npm run dev
    ```
    The dev server starts at `http://localhost:5173` by default. It expects the backend to be running on port 3030.
+
+### TODO:
+ * Job scheduler, Cron scheduler
+ * Kafka?
+ * How to bundle frontend code?
+   * https://kerkour.com/rust-web-services-axum-sqlx-postgresql
