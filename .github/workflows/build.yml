@@ -16,12 +16,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Setup just
+        uses: taiki-e/install-action@just
       - name: Generate code
-        run: make generate-smithy generate-openapi
+        run: just generate-smithy && just generate-openapi
       - name: Verify OpenAPI spec is up to date
         run: |
           git diff --exit-code catalog-svc/openapi.json  || (
-            echo "catalog-svc/openapi.json is out of date. Run 'make generate-openapi' and commit the changes."
+            echo "catalog-svc/openapi.json is out of date. Run 'just generate-openapi' and commit the changes."
             exit 1
           )
       - name: Install non-Cargo deps
@@ -47,7 +49,7 @@ jobs:
       - name: Generate TS client
         run: cd catalog-svc/catalog-client-ts && npm ci && npm run generate
       - name: Build frontend
-        run: make build-frontend
+        run: just build-frontend
 
 #  docker:
 #    name: Build-Push Docker

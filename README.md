@@ -15,9 +15,9 @@ Learning project for Rust ecosystem and various related technologies:
 #### Building
 
 
-* **TypeScript client** (from OpenAPI spec): `make generate-ts-client`
-* **OpenAPI spec** (from Rust server code): `make generate-openapi`
-* **Smithy types** (Gradle): `make generate-smithy`
+* **TypeScript client** (from OpenAPI spec): `just generate-ts-client`
+* **OpenAPI spec** (from Rust server code): `just generate-openapi`
+* **Smithy types** (Gradle): `just generate-smithy`
 
 
 #### Code quality
