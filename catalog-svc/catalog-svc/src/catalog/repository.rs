@@ -1,6 +1,6 @@
 //! SQL repository for [CatalogItem] CRUD operations.
 
-use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use rust_decimal::Decimal;
 use sqlx::{FromRow, PgPool};
 use thiserror::Error;
@@ -18,8 +18,8 @@ struct CatalogItemRow {
     date: NaiveDate,
     brand: Option<String>,
     price: Decimal,
-    created_at: NaiveDateTime,
-    modified_at: NaiveDateTime,
+    created_at: DateTime<Utc>,
+    modified_at: DateTime<Utc>,
 }
 
 impl CatalogItemRow {
@@ -36,8 +36,8 @@ impl CatalogItemRow {
             date: self.date,
             brand: self.brand,
             price: self.price,
-            created_at: DateTime::<Utc>::from_naive_utc_and_offset(self.created_at, Utc),
-            modified_at: DateTime::<Utc>::from_naive_utc_and_offset(self.modified_at, Utc),
+            created_at: self.created_at,
+            modified_at: self.modified_at,
         })
     }
 }
@@ -90,8 +90,8 @@ impl CatalogItemRepository {
         .bind(item.date)
         .bind(&item.brand)
         .bind(item.price)
-        .bind(item.created_at.naive_utc())
-        .bind(item.modified_at.naive_utc())
+        .bind(item.created_at)
+        .bind(item.modified_at)
         .execute(&self.pool)
         .await?;
         Ok(())
@@ -186,7 +186,7 @@ impl CatalogItemRepository {
         .bind(item.date)
         .bind(&item.brand)
         .bind(item.price)
-        .bind(item.modified_at.naive_utc())
+        .bind(item.modified_at)
         .execute(&self.pool)
         .await?;
         Ok(result.rows_affected() > 0)
