@@ -18,16 +18,16 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Setup just
         uses: taiki-e/install-action@just
-      - name: Generate code
-        run: just generate-smithy && just generate-openapi
+      - name: Install non-Cargo deps
+        run: just pre-requisites
+      - name: Generate OpenAPI code (needs Rust first)
+        run: just code-gen
       - name: Verify OpenAPI spec is up to date
         run: |
           git diff --exit-code catalog-svc/openapi.json  || (
             echo "catalog-svc/openapi.json is out of date. Run 'just generate-openapi' and commit the changes."
             exit 1
           )
-      - name: Install non-Cargo deps
-        run: sudo apt-get update -y && sudo apt-get install -y cmake protobuf-compiler
       - name: Build
         run: cargo build
       - name: Lint
@@ -46,8 +46,6 @@ jobs:
           cache-dependency-path: |
             frontend/package-lock.json
             catalog-svc/catalog-client-ts/package-lock.json
-      - name: Generate TS client
-        run: cd catalog-svc/catalog-client-ts && npm ci && npm run generate
       - name: Build frontend
         run: just build-frontend
 

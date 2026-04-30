@@ -2,6 +2,10 @@
 # just database-reset DATABASE_URL=postgres://...
 DATABASE_URL := env_var_or_default("DATABASE_URL", "postgres://postgres:mypassword@localhost:5432/postgres")
 
+pre-requisites:
+    echo Rust pre-requisites
+    sudo apt-get update -y && sudo apt-get install -y cmake protobuf-compiler jq
+
 generate-smithy:
     ./gradlew build
 
@@ -10,7 +14,10 @@ generate-openapi:
 
 # Generate TypeScript client from OpenAPI spec (hey-api)
 generate-ts-client:
-    cd catalog-svc/catalog-client-ts && npm run generate
+    npm --prefix catalog-svc/catalog-client-ts run generate
+
+# Build generated artifacts
+code-gen: generate-smithy generate-openapi generate-ts-client
 
 # Build frontend (Vite/React)
 build-frontend:

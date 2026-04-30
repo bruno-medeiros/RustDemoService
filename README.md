@@ -15,10 +15,12 @@ Learning project for Rust ecosystem and various related technologies:
 #### Building
 
 
-* **TypeScript client** (from OpenAPI spec): `just generate-ts-client`
-* **OpenAPI spec** (from Rust server code): `just generate-openapi`
 * **Smithy types** (Gradle): `just generate-smithy`
-
+* **OpenAPI spec** (from Rust server code): `just generate-openapi`
+* Typescript:
+  * `nvm install 20 && nvm use 20`
+  * **TypeScript client** (from OpenAPI spec): `just generate-ts-client`
+  * `just build-frontend`
 
 #### Code quality
 
