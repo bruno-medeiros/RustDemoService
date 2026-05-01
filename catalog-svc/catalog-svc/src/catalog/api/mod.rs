@@ -23,7 +23,6 @@ pub enum CatalogServiceError {
 }
 
 /// HTTP-exposed catalog operations implemented by [crate::catalog::service::CatalogService].
-/// Administrative helpers such as [crate::catalog::service::CatalogService::increase_prices] are not part of this trait.
 #[async_trait]
 pub trait CatalogServiceApi: Send + Sync {
     async fn create(

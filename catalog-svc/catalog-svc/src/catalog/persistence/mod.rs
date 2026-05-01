@@ -1,10 +1,9 @@
 //! SQL repository for [CatalogItem] CRUD operations.
 
-use async_trait::async_trait;
 use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
 use rust_decimal::Decimal;
 use crate::common::pagination::{PaginatedSearchResponse, Pagination};
-use sqlx::{FromRow, PgPool};
+use sqlx::{Executor, FromRow, Postgres};
 use thiserror::Error;
 use uuid::Uuid;
 
@@ -46,6 +45,9 @@ impl CatalogItemRow {
 
 pub type CatalogItemSearchResponse = PaginatedSearchResponse<CatalogItem>;
 
+/// PostgreSQL catalog persistence. Each method runs on the given [Executor] (`&PgPool`, `&mut Transaction`, …).
+pub struct CatalogItemRepository;
+
 /// Errors from [CatalogItemRepository] operations.
 #[derive(Error, Debug)]
 pub enum RepositoryError {
@@ -56,34 +58,11 @@ pub enum RepositoryError {
     InvalidCategory(String),
 }
 
-/// Persistence port for catalog items (create, read, update, delete, search).
-#[async_trait]
-pub trait CatalogItemRepository: Send + Sync {
-    async fn create(&self, item: &CatalogItem) -> Result<(), RepositoryError>;
-    async fn get(&self, item_id: Uuid) -> Result<Option<CatalogItem>, RepositoryError>;
-    async fn update(&self, item: &CatalogItem) -> Result<bool, RepositoryError>;
-    async fn delete(&self, item_id: Uuid) -> Result<bool, RepositoryError>;
-    async fn search(
-        &self,
-        page: Pagination,
-    ) -> Result<CatalogItemSearchResponse, RepositoryError>;
-}
-
-/// PostgreSQL implementation of [CatalogItemRepository].
-#[derive(Clone)]
-pub struct PgCatalogItemRepository {
-    pool: PgPool,
-}
-
-impl PgCatalogItemRepository {
-    pub fn new(pool: PgPool) -> Self {
-        Self { pool }
-    }
-}
-
-#[async_trait]
-impl CatalogItemRepository for PgCatalogItemRepository {
-    async fn create(&self, item: &CatalogItem) -> Result<(), RepositoryError> {
+impl CatalogItemRepository {
+    pub async fn create(
+        executor: impl Executor<'_, Database = Postgres>,
+        item: &CatalogItem,
+    ) -> Result<(), RepositoryError> {
         sqlx::query(
             r#"
             INSERT INTO catalog_items (
@@ -109,12 +88,15 @@ impl CatalogItemRepository for PgCatalogItemRepository {
         .bind(item.price)
         .bind(item.created_at.naive_utc())
         .bind(item.modified_at.naive_utc())
-        .execute(&self.pool)
+        .execute(executor)
         .await?;
         Ok(())
     }
 
-    async fn get(&self, item_id: Uuid) -> Result<Option<CatalogItem>, RepositoryError> {
+    pub async fn get(
+        executor: impl Executor<'_, Database = Postgres>,
+        item_id: Uuid,
+    ) -> Result<Option<CatalogItem>, RepositoryError> {
         let row = sqlx::query_as::<_, CatalogItemRow>(
             r#"
             SELECT
@@ -132,13 +114,16 @@ impl CatalogItemRepository for PgCatalogItemRepository {
             "#,
         )
         .bind(item_id)
-        .fetch_optional(&self.pool)
+        .fetch_optional(executor)
         .await?;
 
         row.map(CatalogItemRow::into_catalog_item).transpose()
     }
 
-    async fn update(&self, item: &CatalogItem) -> Result<bool, RepositoryError> {
+    pub async fn update(
+        executor: impl Executor<'_, Database = Postgres>,
+        item: &CatalogItem,
+    ) -> Result<bool, RepositoryError> {
         let result = sqlx::query(
             r#"
             UPDATE catalog_items
@@ -161,12 +146,15 @@ impl CatalogItemRepository for PgCatalogItemRepository {
         .bind(&item.brand)
         .bind(item.price)
         .bind(item.modified_at.naive_utc())
-        .execute(&self.pool)
+        .execute(executor)
         .await?;
         Ok(result.rows_affected() > 0)
     }
 
-    async fn delete(&self, item_id: Uuid) -> Result<bool, RepositoryError> {
+    pub async fn delete(
+        executor: impl Executor<'_, Database = Postgres>,
+        item_id: Uuid,
+    ) -> Result<bool, RepositoryError> {
         let result = sqlx::query(
             r#"
             DELETE FROM catalog_items
@@ -174,13 +162,13 @@ impl CatalogItemRepository for PgCatalogItemRepository {
             "#,
         )
         .bind(item_id)
-        .execute(&self.pool)
+        .execute(executor)
         .await?;
         Ok(result.rows_affected() > 0)
     }
 
-    async fn search(
-        &self,
+    pub async fn search(
+        executor: impl Executor<'_, Database = Postgres>,
         page: Pagination,
     ) -> Result<CatalogItemSearchResponse, RepositoryError> {
         let limit = page.limit;
@@ -203,10 +191,10 @@ impl CatalogItemRepository for PgCatalogItemRepository {
             LIMIT $1 OFFSET $2
             "#,
         )
-            .bind(limit + 1)
-            .bind(offset)
-            .fetch_all(&self.pool)
-            .await?;
+        .bind(limit + 1)
+        .bind(offset)
+        .fetch_all(executor)
+        .await?;
 
         let has_more = rows.len() as i64 > limit;
         let take = if has_more { limit as usize } else { rows.len() };

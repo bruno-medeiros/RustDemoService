@@ -1,16 +1,15 @@
-use std::sync::Arc;
-
 use async_trait::async_trait;
 use chrono::{NaiveDate, Utc};
 use rust_decimal::Decimal;
+use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::catalog::api::{
     CatalogItem, CatalogServiceApi, CatalogServiceError, CreateCatalogItemBody,
     ListCatalogItemsRequest, ListCatalogItemsResponse, UpdateCatalogItemBody,
 };
-use crate::common::pagination::Pagination;
 use crate::catalog::persistence::{CatalogItemRepository, RepositoryError};
+use crate::common::pagination::Pagination;
 
 impl From<RepositoryError> for CatalogServiceError {
     fn from(err: RepositoryError) -> Self {
@@ -18,17 +17,19 @@ impl From<RepositoryError> for CatalogServiceError {
     }
 }
 
-/// CRUD service for catalog items, backed by a [CatalogItemRepository].
+/// CRUD service for catalog items, using [CatalogItemRepository] against [PgPool].
 #[derive(Clone)]
 pub struct CatalogService {
-    repo: Arc<dyn CatalogItemRepository>,
+    pg_pool: PgPool,
 }
 
 impl CatalogService {
-    pub fn new(repo: impl CatalogItemRepository + 'static) -> Self {
-        Self {
-            repo: Arc::new(repo),
-        }
+    pub fn new(pg_pool: PgPool) -> Self {
+        Self { pg_pool }
+    }
+
+    pub fn pg_pool(&self) -> &PgPool {
+        &self.pg_pool
     }
 
     /// Create a new catalog item. Server assigns item_id and timestamps.
@@ -52,13 +53,13 @@ impl CatalogService {
             modified_at: now,
         };
 
-        self.repo.create(&item).await?;
+        CatalogItemRepository::create(&self.pg_pool, &item).await?;
         Ok(item)
     }
 
     /// Get a catalog item by id, if it exists.
     pub async fn get(&self, item_id: Uuid) -> Result<Option<CatalogItem>, CatalogServiceError> {
-        Ok(self.repo.get(item_id).await?)
+        Ok(CatalogItemRepository::get(&self.pg_pool, item_id).await?)
     }
 
     /// List catalog items with optional offset-based pagination.
@@ -69,10 +70,8 @@ impl CatalogService {
         let limit = req.limit.unwrap_or(100).clamp(1, 100);
         let offset = req.offset.unwrap_or(0).max(0);
 
-        let search = self
-            .repo
-            .search(Pagination { limit, offset })
-            .await?;
+        let search =
+            CatalogItemRepository::search(&self.pg_pool, Pagination { limit, offset }).await?;
         Ok(ListCatalogItemsResponse::from_paginated(
             search,
             Pagination { limit, offset },
@@ -88,7 +87,7 @@ impl CatalogService {
         let date = NaiveDate::parse_from_str(&body.date, "%Y-%m-%d")
             .map_err(|e| CatalogServiceError::ValidationError(Box::new(e)))?;
 
-        let existing = self.repo.get(item_id).await?;
+        let existing = CatalogItemRepository::get(&self.pg_pool, item_id).await?;
         let Some(mut item) = existing else {
             return Ok(None);
         };
@@ -99,7 +98,7 @@ impl CatalogService {
         item.brand = body.brand;
         item.price = body.price;
         item.modified_at = Utc::now();
-        let updated = self.repo.update(&item).await?;
+        let updated = CatalogItemRepository::update(&self.pg_pool, &item).await?;
         if updated {
             Ok(Some(item))
         } else {
@@ -109,11 +108,11 @@ impl CatalogService {
 
     /// Delete a catalog item. Returns true if it existed and was removed.
     pub async fn delete(&self, item_id: Uuid) -> Result<bool, CatalogServiceError> {
-        Ok(self.repo.delete(item_id).await?)
+        Ok(CatalogItemRepository::delete(&self.pg_pool, item_id).await?)
     }
 
     /// Multiply every stored item's price by `multiplier` (e.g. `1.1` for a 10% increase).
-    /// Visits all rows via paginated [CatalogItemRepository::search].
+    /// Runs inside a single SQL transaction.
     pub async fn increase_prices(&self, multiplier: Decimal) -> Result<u64, CatalogServiceError> {
         if multiplier <= Decimal::ZERO {
             return Err(CatalogServiceError::ValidationError(Box::new(
@@ -124,19 +123,22 @@ impl CatalogService {
             )));
         }
 
-        const PAGE: i64 = 100;
+        let mult = multiplier;
+        let mut tx = self.pg_pool.begin().await.map_err(RepositoryError::from)?;
+
         let mut offset: i64 = 0;
         let mut updated: u64 = 0;
+        const PAGE: i64 = 100;
 
         loop {
-            // FIXME: use cursor based pagination
-            let page = self
-                .repo
-                .search(Pagination {
+            let page = CatalogItemRepository::search(
+                &mut *tx,
+                Pagination {
                     limit: PAGE,
                     offset,
-                })
-                .await?;
+                },
+            )
+            .await?;
 
             if page.items.is_empty() {
                 break;
@@ -144,15 +146,10 @@ impl CatalogService {
 
             let batch_modified_at = Utc::now();
             for mut item in page.items {
-                let new_price = item.price.checked_mul(multiplier).ok_or_else(|| {
-                    CatalogServiceError::InternalError(Box::new(std::io::Error::new(
-                        std::io::ErrorKind::Other,
-                        "price multiplication overflow",
-                    )))
-                })?;
+                let new_price = item.price * mult;
                 item.price = new_price;
                 item.modified_at = batch_modified_at;
-                self.repo.update(&item).await?;
+                CatalogItemRepository::update(&mut *tx, &item).await?;
                 updated += 1;
             }
 
@@ -162,6 +159,7 @@ impl CatalogService {
             offset += PAGE;
         }
 
+        tx.commit().await.map_err(RepositoryError::from)?;
         Ok(updated)
     }
 }
