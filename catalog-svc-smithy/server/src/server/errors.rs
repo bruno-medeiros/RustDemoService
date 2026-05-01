@@ -1,7 +1,7 @@
 //! Error conversion from domain/DTO errors to Smithy API error types.
 
 use catalog_api::error;
-use catalog_svc::catalog::service::CatalogServiceError;
+use catalog_svc::catalog::api::CatalogServiceError;
 
 use crate::server::dtos::DtoConversionError;
 

@@ -15,7 +15,8 @@ use crate::catalog::api::{
     UpdateCatalogItemBody,
 };
 use crate::common::pagination::Pagination;
-use crate::catalog::service::{CatalogService, CatalogServiceError};
+use crate::catalog::api::CatalogServiceError;
+use crate::catalog::service::CatalogService;
 
 impl From<CatalogServiceError> for StatusCode {
     fn from(err: CatalogServiceError) -> StatusCode {

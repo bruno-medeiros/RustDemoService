@@ -1,10 +1,51 @@
+use std::error::Error as StdError;
+
+use async_trait::async_trait;
 use chrono::{DateTime, NaiveDate, Utc};
 use rust_decimal::Decimal;
+use thiserror::Error;
 use crate::common::pagination::{PaginatedSearchResponse, Pagination};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
 use utoipa::ToSchema;
 use uuid::Uuid;
+
+type BoxError = Box<dyn StdError + Send + Sync>;
+
+/// Errors that can occur when using [CatalogServiceApi] / [crate::catalog::service::CatalogService].
+#[derive(Error, Debug)]
+pub enum CatalogServiceError {
+    #[error("validation error: {0}")]
+    ValidationError(#[source] BoxError),
+
+    #[error("internal error: {0}")]
+    InternalError(#[source] BoxError),
+}
+
+/// HTTP-exposed catalog operations implemented by [crate::catalog::service::CatalogService].
+/// Administrative helpers such as [crate::catalog::service::CatalogService::increase_prices] are not part of this trait.
+#[async_trait]
+pub trait CatalogServiceApi: Send + Sync {
+    async fn create(
+        &self,
+        body: CreateCatalogItemBody,
+    ) -> Result<CatalogItem, CatalogServiceError>;
+
+    async fn get(&self, item_id: Uuid) -> Result<Option<CatalogItem>, CatalogServiceError>;
+
+    async fn list(
+        &self,
+        req: ListCatalogItemsRequest,
+    ) -> Result<ListCatalogItemsResponse, CatalogServiceError>;
+
+    async fn update(
+        &self,
+        item_id: Uuid,
+        body: UpdateCatalogItemBody,
+    ) -> Result<Option<CatalogItem>, CatalogServiceError>;
+
+    async fn delete(&self, item_id: Uuid) -> Result<bool, CatalogServiceError>;
+}
 
 /// Catalog item category.
 #[derive(

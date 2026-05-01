@@ -1,27 +1,16 @@
 use std::sync::Arc;
 
+use async_trait::async_trait;
 use chrono::{NaiveDate, Utc};
-use thiserror::Error;
+use rust_decimal::Decimal;
 use uuid::Uuid;
 
 use crate::catalog::api::{
-    CatalogItem, CreateCatalogItemBody, ListCatalogItemsRequest, ListCatalogItemsResponse,
-    UpdateCatalogItemBody,
+    CatalogItem, CatalogServiceApi, CatalogServiceError, CreateCatalogItemBody,
+    ListCatalogItemsRequest, ListCatalogItemsResponse, UpdateCatalogItemBody,
 };
 use crate::common::pagination::Pagination;
 use crate::catalog::persistence::{CatalogItemRepository, RepositoryError};
-
-type BoxError = Box<dyn std::error::Error + Send + Sync>;
-
-/// Errors that can occur when using [CatalogService].
-#[derive(Error, Debug)]
-pub enum CatalogServiceError {
-    #[error("validation error: {0}")]
-    ValidationError(#[source] BoxError),
-
-    #[error("internal error: {0}")]
-    InternalError(#[source] BoxError),
-}
 
 impl From<RepositoryError> for CatalogServiceError {
     fn from(err: RepositoryError) -> Self {
@@ -121,5 +110,91 @@ impl CatalogService {
     /// Delete a catalog item. Returns true if it existed and was removed.
     pub async fn delete(&self, item_id: Uuid) -> Result<bool, CatalogServiceError> {
         Ok(self.repo.delete(item_id).await?)
+    }
+
+    /// Multiply every stored item's price by `multiplier` (e.g. `1.1` for a 10% increase).
+    /// Visits all rows via paginated [CatalogItemRepository::search].
+    pub async fn increase_prices(&self, multiplier: Decimal) -> Result<u64, CatalogServiceError> {
+        if multiplier <= Decimal::ZERO {
+            return Err(CatalogServiceError::ValidationError(Box::new(
+                std::io::Error::new(
+                    std::io::ErrorKind::InvalidInput,
+                    "multiplier must be greater than zero",
+                ),
+            )));
+        }
+
+        const PAGE: i64 = 100;
+        let mut offset: i64 = 0;
+        let mut updated: u64 = 0;
+
+        loop {
+            // FIXME: use cursor based pagination
+            let page = self
+                .repo
+                .search(Pagination {
+                    limit: PAGE,
+                    offset,
+                })
+                .await?;
+
+            if page.items.is_empty() {
+                break;
+            }
+
+            let batch_modified_at = Utc::now();
+            for mut item in page.items {
+                let new_price = item.price.checked_mul(multiplier).ok_or_else(|| {
+                    CatalogServiceError::InternalError(Box::new(std::io::Error::new(
+                        std::io::ErrorKind::Other,
+                        "price multiplication overflow",
+                    )))
+                })?;
+                item.price = new_price;
+                item.modified_at = batch_modified_at;
+                self.repo.update(&item).await?;
+                updated += 1;
+            }
+
+            if !page.has_more {
+                break;
+            }
+            offset += PAGE;
+        }
+
+        Ok(updated)
+    }
+}
+
+#[async_trait]
+impl CatalogServiceApi for CatalogService {
+    async fn create(
+        &self,
+        body: CreateCatalogItemBody,
+    ) -> Result<CatalogItem, CatalogServiceError> {
+        CatalogService::create(self, body).await
+    }
+
+    async fn get(&self, item_id: Uuid) -> Result<Option<CatalogItem>, CatalogServiceError> {
+        CatalogService::get(self, item_id).await
+    }
+
+    async fn list(
+        &self,
+        req: ListCatalogItemsRequest,
+    ) -> Result<ListCatalogItemsResponse, CatalogServiceError> {
+        CatalogService::list(self, req).await
+    }
+
+    async fn update(
+        &self,
+        item_id: Uuid,
+        body: UpdateCatalogItemBody,
+    ) -> Result<Option<CatalogItem>, CatalogServiceError> {
+        CatalogService::update(self, item_id, body).await
+    }
+
+    async fn delete(&self, item_id: Uuid) -> Result<bool, CatalogServiceError> {
+        CatalogService::delete(self, item_id).await
     }
 }
