@@ -19,6 +19,9 @@ generate-ts-client:
 # Build generated artifacts
 code-gen: generate-smithy generate-openapi generate-ts-client
 
+start-docker-deps:
+    docker compose -f docker-compose.yml up -d
+
 # Build frontend (Vite/React)
 build-frontend:
     cd frontend && npm ci && npm run build

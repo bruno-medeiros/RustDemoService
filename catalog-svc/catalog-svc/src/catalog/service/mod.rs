@@ -10,7 +10,7 @@ use crate::catalog::api::{
     CatalogItem, CreateCatalogItemBody, ListCatalogItemsRequest, ListCatalogItemsResponse,
     UpdateCatalogItemBody,
 };
-use crate::catalog::repository::{CatalogItemRepository, RepositoryError};
+use crate::catalog::persistence::{CatalogItemRepository, RepositoryError};
 
 type BoxError = Box<dyn std::error::Error + Send + Sync>;
 

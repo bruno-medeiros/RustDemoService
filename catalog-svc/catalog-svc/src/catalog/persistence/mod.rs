@@ -122,47 +122,6 @@ impl CatalogItemRepository {
         row.map(CatalogItemRow::into_catalog_item).transpose()
     }
 
-    /// List catalog items with limit and offset. Returns (items, next_offset) where next_offset is
-    /// Some(offset + limit) if there are more rows.
-    pub async fn list(
-        &self,
-        limit: i64,
-        offset: i64,
-    ) -> Result<(Vec<CatalogItem>, Option<i64>), RepositoryError> {
-        let rows = sqlx::query_as::<_, CatalogItemRow>(
-            r#"
-            SELECT
-                item_id,
-                name,
-                description,
-                category,
-                date,
-                brand,
-                price,
-                created_at,
-                modified_at
-            FROM catalog_items
-            ORDER BY created_at
-            LIMIT $1 OFFSET $2
-            "#,
-        )
-        .bind(limit + 1)
-        .bind(offset)
-        .fetch_all(&self.pool)
-        .await?;
-
-        let has_more = rows.len() as i64 > limit;
-        let take = if has_more { limit as usize } else { rows.len() };
-        let items: Result<Vec<_>, _> = rows
-            .into_iter()
-            .take(take)
-            .map(CatalogItemRow::into_catalog_item)
-            .collect();
-        let items = items?;
-        let next_offset = if has_more { Some(offset + limit) } else { None };
-        Ok((items, next_offset))
-    }
-
     /// Update an existing catalog item. Returns true if a row was updated.
     pub async fn update(&self, item: &CatalogItem) -> Result<bool, RepositoryError> {
         let result = sqlx::query(
@@ -205,4 +164,46 @@ impl CatalogItemRepository {
         .await?;
         Ok(result.rows_affected() > 0)
     }
+
+    /// List catalog items with limit and offset. Returns (items, next_offset) where next_offset is
+    /// Some(offset + limit) if there are more rows.
+    pub async fn list(
+        &self,
+        limit: i64,
+        offset: i64,
+    ) -> Result<(Vec<CatalogItem>, Option<i64>), RepositoryError> {
+        let rows = sqlx::query_as::<_, CatalogItemRow>(
+            r#"
+            SELECT
+                item_id,
+                name,
+                description,
+                category,
+                date,
+                brand,
+                price,
+                created_at,
+                modified_at
+            FROM catalog_items
+            ORDER BY created_at
+            LIMIT $1 OFFSET $2
+            "#,
+        )
+            .bind(limit + 1)
+            .bind(offset)
+            .fetch_all(&self.pool)
+            .await?;
+
+        let has_more = rows.len() as i64 > limit;
+        let take = if has_more { limit as usize } else { rows.len() };
+        let items: Result<Vec<_>, _> = rows
+            .into_iter()
+            .take(take)
+            .map(CatalogItemRow::into_catalog_item)
+            .collect();
+        let items = items?;
+        let next_offset = if has_more { Some(offset + limit) } else { None };
+        Ok((items, next_offset))
+    }
+
 }
