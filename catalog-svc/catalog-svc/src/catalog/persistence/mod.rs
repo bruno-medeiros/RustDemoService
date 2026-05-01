@@ -1,5 +1,6 @@
 //! SQL repository for [CatalogItem] CRUD operations.
 
+use async_trait::async_trait;
 use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
 use rust_decimal::Decimal;
 use crate::common::pagination::{PaginatedSearchResponse, Pagination};
@@ -55,19 +56,34 @@ pub enum RepositoryError {
     InvalidCategory(String),
 }
 
-/// SQL repository for catalog items. Handles CRUD against the `catalog_items` table.
+/// Persistence port for catalog items (create, read, update, delete, search).
+#[async_trait]
+pub trait CatalogItemRepository: Send + Sync {
+    async fn create(&self, item: &CatalogItem) -> Result<(), RepositoryError>;
+    async fn get(&self, item_id: Uuid) -> Result<Option<CatalogItem>, RepositoryError>;
+    async fn update(&self, item: &CatalogItem) -> Result<bool, RepositoryError>;
+    async fn delete(&self, item_id: Uuid) -> Result<bool, RepositoryError>;
+    async fn search(
+        &self,
+        page: Pagination,
+    ) -> Result<CatalogItemSearchResponse, RepositoryError>;
+}
+
+/// PostgreSQL implementation of [CatalogItemRepository].
 #[derive(Clone)]
-pub struct CatalogItemRepository {
+pub struct PgCatalogItemRepository {
     pool: PgPool,
 }
 
-impl CatalogItemRepository {
+impl PgCatalogItemRepository {
     pub fn new(pool: PgPool) -> Self {
         Self { pool }
     }
+}
 
-    /// Insert a new catalog item.
-    pub async fn create(&self, item: &CatalogItem) -> Result<(), RepositoryError> {
+#[async_trait]
+impl CatalogItemRepository for PgCatalogItemRepository {
+    async fn create(&self, item: &CatalogItem) -> Result<(), RepositoryError> {
         sqlx::query(
             r#"
             INSERT INTO catalog_items (
@@ -98,8 +114,7 @@ impl CatalogItemRepository {
         Ok(())
     }
 
-    /// Fetch a catalog item by id.
-    pub async fn get(&self, item_id: Uuid) -> Result<Option<CatalogItem>, RepositoryError> {
+    async fn get(&self, item_id: Uuid) -> Result<Option<CatalogItem>, RepositoryError> {
         let row = sqlx::query_as::<_, CatalogItemRow>(
             r#"
             SELECT
@@ -123,8 +138,7 @@ impl CatalogItemRepository {
         row.map(CatalogItemRow::into_catalog_item).transpose()
     }
 
-    /// Update an existing catalog item. Returns true if a row was updated.
-    pub async fn update(&self, item: &CatalogItem) -> Result<bool, RepositoryError> {
+    async fn update(&self, item: &CatalogItem) -> Result<bool, RepositoryError> {
         let result = sqlx::query(
             r#"
             UPDATE catalog_items
@@ -152,8 +166,7 @@ impl CatalogItemRepository {
         Ok(result.rows_affected() > 0)
     }
 
-    /// Delete a catalog item by id. Returns true if a row was deleted.
-    pub async fn delete(&self, item_id: Uuid) -> Result<bool, RepositoryError> {
+    async fn delete(&self, item_id: Uuid) -> Result<bool, RepositoryError> {
         let result = sqlx::query(
             r#"
             DELETE FROM catalog_items
@@ -166,8 +179,7 @@ impl CatalogItemRepository {
         Ok(result.rows_affected() > 0)
     }
 
-    /// Search catalog items with offset-based pagination, ordered by `created_at`, then `item_id`.
-    pub async fn search(
+    async fn search(
         &self,
         page: Pagination,
     ) -> Result<CatalogItemSearchResponse, RepositoryError> {
@@ -207,5 +219,4 @@ impl CatalogItemRepository {
 
         Ok(CatalogItemSearchResponse::new(items, has_more))
     }
-
 }

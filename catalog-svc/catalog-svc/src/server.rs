@@ -21,8 +21,9 @@ pub async fn build_app(app_config: &AppConfig) -> CatalogApp {
         .expect("failed to run database migrations");
     tracing::info!("Database migrations applied");
 
-    let catalog_repo = crate::catalog::persistence::CatalogItemRepository::new(pg_pool.clone());
-    let catalog = CatalogService::with_repository(catalog_repo);
+    let catalog_repo =
+        crate::catalog::persistence::PgCatalogItemRepository::new(pg_pool.clone());
+    let catalog = CatalogService::new(catalog_repo);
     let shutdown = tokio_util::sync::CancellationToken::new();
     CatalogApp {
         catalog,

@@ -671,6 +671,7 @@ name = "catalog-svc"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "axum",
  "catalog-svc",
  "catalog-svc-client",

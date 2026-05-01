@@ -7,6 +7,7 @@ edition = "2021"
 test-utils = []
 
 [dependencies]
+async-trait = { workspace = true }
 anyhow = { workspace = true }
 rust-demo-commons = { path = "../../commons", features = ["test-utils"] }
 thiserror = { workspace = true }
