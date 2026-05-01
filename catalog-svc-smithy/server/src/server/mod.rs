@@ -7,6 +7,7 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use catalog_api::server::request::extension::Extension;
+use catalog_api::model as smithy;
 use catalog_api::{error, input, output};
 use catalog_svc::catalog::api::{
     CreateCatalogItemBody, ListCatalogItemsRequest, ListCatalogItemsResponse, UpdateCatalogItemBody,
@@ -114,11 +115,17 @@ pub async fn list_catalog_items(
     Extension(state): Extension<Arc<AppState>>,
 ) -> Result<output::ListCatalogItemsOutput, error::ListCatalogItemsError> {
     let req = ListCatalogItemsRequest {
-        max_results: input.max_results,
-        next_token: input.next_token,
+        limit: input.limit,
+        offset: input.offset,
     };
 
-    let ListCatalogItemsResponse { items, next_token } = state
+    let ListCatalogItemsResponse {
+        items,
+        has_more,
+        total_count,
+        pagination,
+        ..
+    } = state
         .catalog
         .list(req)
         .await
@@ -128,6 +135,11 @@ pub async fn list_catalog_items(
 
     Ok(output::ListCatalogItemsOutput {
         items: smithy_items,
-        next_token,
+        has_more,
+        total_count: total_count.and_then(|c| i64::try_from(c).ok()),
+        pagination: smithy::Pagination {
+            limit: pagination.limit,
+            offset: pagination.offset,
+        },
     })
 }

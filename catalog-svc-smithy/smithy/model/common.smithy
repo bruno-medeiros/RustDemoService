@@ -23,3 +23,12 @@ string Uuid
 @pattern("^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
 @length(min: 10, max: 10)
 string DateOnly
+
+/// Applied page window (limit and offset).
+structure Pagination {
+    @required
+    limit: Long
+
+    @required
+    offset: Long
+}

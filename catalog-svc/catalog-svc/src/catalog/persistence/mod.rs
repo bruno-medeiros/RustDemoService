@@ -2,6 +2,7 @@
 
 use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
 use rust_decimal::Decimal;
+use crate::common::pagination::{PaginatedSearchResponse, Pagination};
 use sqlx::{FromRow, PgPool};
 use thiserror::Error;
 use uuid::Uuid;
@@ -42,6 +43,8 @@ impl CatalogItemRow {
     }
 }
 
+pub type CatalogItemSearchResponse = PaginatedSearchResponse<CatalogItem>;
+
 /// Errors from [CatalogItemRepository] operations.
 #[derive(Error, Debug)]
 pub enum RepositoryError {
@@ -57,8 +60,6 @@ pub enum RepositoryError {
 pub struct CatalogItemRepository {
     pool: PgPool,
 }
-
-// TODO: review this
 
 impl CatalogItemRepository {
     pub fn new(pool: PgPool) -> Self {
@@ -165,13 +166,14 @@ impl CatalogItemRepository {
         Ok(result.rows_affected() > 0)
     }
 
-    /// List catalog items with limit and offset. Returns (items, next_offset) where next_offset is
-    /// Some(offset + limit) if there are more rows.
-    pub async fn list(
+    /// Search catalog items with offset-based pagination, ordered by `created_at`, then `item_id`.
+    pub async fn search(
         &self,
-        limit: i64,
-        offset: i64,
-    ) -> Result<(Vec<CatalogItem>, Option<i64>), RepositoryError> {
+        page: Pagination,
+    ) -> Result<CatalogItemSearchResponse, RepositoryError> {
+        let limit = page.limit;
+        let offset = page.offset;
+
         let rows = sqlx::query_as::<_, CatalogItemRow>(
             r#"
             SELECT
@@ -185,7 +187,7 @@ impl CatalogItemRepository {
                 created_at,
                 modified_at
             FROM catalog_items
-            ORDER BY created_at
+            ORDER BY created_at, item_id
             LIMIT $1 OFFSET $2
             "#,
         )
@@ -202,8 +204,8 @@ impl CatalogItemRepository {
             .map(CatalogItemRow::into_catalog_item)
             .collect();
         let items = items?;
-        let next_offset = if has_more { Some(offset + limit) } else { None };
-        Ok((items, next_offset))
+
+        Ok(CatalogItemSearchResponse::new(items, has_more))
     }
 
 }

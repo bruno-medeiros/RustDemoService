@@ -151,24 +151,30 @@ list CatalogItemList {
     member: CatalogItem
 }
 
-/// List of catalog items with optional pagination token
+/// List of catalog items with offset-based pagination.
 structure ListCatalogItemsOutput {
     @required
     items: CatalogItemList
 
-    nextToken: String
+    @required
+    hasMore: Boolean
+
+    /// Total rows matching the query, when the server chooses to compute it (omit otherwise).
+    totalCount: Long
+
+    @required
+    pagination: Pagination
 }
 
 @readonly
-@paginated(inputToken: "nextToken", outputToken: "nextToken", pageSize: "maxResults", items: "items")
 @http(method: "GET", uri: "/catalog/items")
 operation ListCatalogItems {
     input := {
-        @httpQuery("maxResults")
-        maxResults: Integer
+        @httpQuery("limit")
+        limit: Long
 
-        @httpQuery("nextToken")
-        nextToken: String
+        @httpQuery("offset")
+        offset: Long
     }
 
     output: ListCatalogItemsOutput

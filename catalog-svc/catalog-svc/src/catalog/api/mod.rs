@@ -1,5 +1,6 @@
 use chrono::{DateTime, NaiveDate, Utc};
 use rust_decimal::Decimal;
+use crate::common::pagination::{PaginatedSearchResponse, Pagination};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
 use utoipa::ToSchema;
@@ -69,10 +70,10 @@ pub struct UpdateCatalogItemBody {
 #[into_params(parameter_in = Query)]
 #[serde(rename_all = "camelCase")]
 pub struct ListCatalogItemsRequest {
-    /// Maximum number of items to return (page size).
-    pub max_results: Option<i32>,
-    /// Pagination token from previous response.
-    pub next_token: Option<String>,
+    /// Maximum number of items to return (page size). Defaults to 100; clamped server-side.
+    pub limit: Option<i64>,
+    /// Zero-based offset into the result set. Defaults to 0.
+    pub offset: Option<i64>,
 }
 
 /// Response for the list catalog items endpoint.
@@ -80,5 +81,27 @@ pub struct ListCatalogItemsRequest {
 #[serde(rename_all = "camelCase")]
 pub struct ListCatalogItemsResponse {
     pub items: Vec<CatalogItem>,
-    pub next_token: Option<String>,
+    pub has_more: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total_count: Option<u64>,
+    pub pagination: Pagination,
+}
+
+impl ListCatalogItemsResponse {
+    pub(crate) fn from_paginated(
+        page: PaginatedSearchResponse<CatalogItem>,
+        pagination: Pagination,
+    ) -> Self {
+        let PaginatedSearchResponse {
+            items,
+            has_more,
+            total_count,
+        } = page;
+        Self {
+            items,
+            has_more,
+            total_count,
+            pagination,
+        }
+    }
 }

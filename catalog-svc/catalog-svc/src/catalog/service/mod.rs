@@ -10,6 +10,7 @@ use crate::catalog::api::{
     CatalogItem, CreateCatalogItemBody, ListCatalogItemsRequest, ListCatalogItemsResponse,
     UpdateCatalogItemBody,
 };
+use crate::common::pagination::{PaginatedSearchResponse, Pagination};
 use crate::catalog::persistence::{CatalogItemRepository, RepositoryError};
 
 type BoxError = Box<dyn std::error::Error + Send + Sync>;
@@ -104,38 +105,39 @@ impl CatalogService {
         }
     }
 
-    /// List catalog items with optional pagination (max_results, next_token).
+    /// List catalog items with optional offset-based pagination.
     pub async fn list(
         &self,
         req: ListCatalogItemsRequest,
     ) -> Result<ListCatalogItemsResponse, CatalogServiceError> {
-        let max_results = req.max_results.unwrap_or(100).clamp(1, 100) as i64;
-        let offset = req
-            .next_token
-            .as_deref()
-            .and_then(|t| t.parse::<i64>().ok())
-            .unwrap_or(0);
+        let limit = req.limit.unwrap_or(100).clamp(1, 100);
+        let offset = req.offset.unwrap_or(0).max(0);
 
         match &self.backend {
             CatalogBackend::Memory(store) => {
-                let items: Vec<CatalogItem> = store.read().await.values().cloned().collect();
+                let mut items: Vec<CatalogItem> = store.read().await.values().cloned().collect();
+                items.sort_by(|a, b| {
+                    a.created_at
+                        .cmp(&b.created_at)
+                        .then_with(|| a.item_id.cmp(&b.item_id))
+                });
                 let start = offset as usize;
-                let end = (start + max_results as usize).min(items.len());
+                let end = (start + limit as usize).min(items.len());
                 let page: Vec<CatalogItem> = items[start..end].to_vec();
-                let next_token = if end < items.len() {
-                    Some(end.to_string())
-                } else {
-                    None
-                };
-                Ok(ListCatalogItemsResponse {
-                    items: page,
-                    next_token,
-                })
+                let has_more = end < items.len();
+                Ok(ListCatalogItemsResponse::from_paginated(
+                    PaginatedSearchResponse::new(page, has_more),
+                    Pagination { limit, offset },
+                ))
             }
             CatalogBackend::Sql(repo) => {
-                let (items, next_offset) = repo.list(max_results, offset).await?;
-                let next_token = next_offset.map(|o| o.to_string());
-                Ok(ListCatalogItemsResponse { items, next_token })
+                let search = repo
+                    .search(Pagination { limit, offset })
+                    .await?;
+                Ok(ListCatalogItemsResponse::from_paginated(
+                    search,
+                    Pagination { limit, offset },
+                ))
             }
         }
     }

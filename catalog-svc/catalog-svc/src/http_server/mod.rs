@@ -14,6 +14,7 @@ use crate::catalog::api::{
     CatalogItem, CreateCatalogItemBody, ListCatalogItemsRequest, ListCatalogItemsResponse,
     UpdateCatalogItemBody,
 };
+use crate::common::pagination::Pagination;
 use crate::catalog::service::{CatalogService, CatalogServiceError};
 
 impl From<CatalogServiceError> for StatusCode {
@@ -41,6 +42,7 @@ impl From<CatalogServiceError> for StatusCode {
         UpdateCatalogItemBody,
         ListCatalogItemsRequest,
         ListCatalogItemsResponse,
+        Pagination,
     ))
 )]
 pub struct ApiDoc;
