@@ -145,8 +145,7 @@ impl CatalogService {
             let batch_modified_at = Utc::now();
             for mut item in page.items {
                 let new_price = item.price.checked_mul(multiplier).ok_or_else(|| {
-                    CatalogServiceError::InternalError(Box::new(std::io::Error::new(
-                        std::io::ErrorKind::Other,
+                    CatalogServiceError::InternalError(Box::new(std::io::Error::other(
                         "price multiplication overflow",
                     )))
                 })?;

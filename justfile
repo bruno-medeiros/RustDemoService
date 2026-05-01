@@ -14,6 +14,7 @@ generate-openapi:
 
 # Generate TypeScript client from OpenAPI spec (hey-api)
 generate-ts-client:
+    npm --prefix catalog-svc/catalog-client-ts ci
     npm --prefix catalog-svc/catalog-client-ts run generate
 
 # Build generated artifacts
