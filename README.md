@@ -3,6 +3,7 @@
 Learning project for Rust ecosystem and various related technologies:
  
   * `catalog-svc` - standard Rust webapp using Axum and Utoipa to generate a openapi spec + client generation
+    * Rust client generation uses progenitor-client which require an OpenAPI 3.0 spec (we have to downvert from 3.1)
   * `catalog-svc-smithy` - a variation of the above using Smithy for API generation and server.
     * use `./gradlew build` to generate the types
 
