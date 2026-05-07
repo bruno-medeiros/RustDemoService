@@ -38,7 +38,8 @@ Learning project for Rust ecosystem and various related technologies:
 
 1. Install dependencies and start the dev server:
    ```bash
-   cd frontend && npm run dev
+   cd frontend
+   npm run dev
    ```
    The dev server starts at `http://localhost:5173` by default. It expects the backend to be running on port 3030.
 

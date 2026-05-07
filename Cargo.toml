@@ -39,7 +39,7 @@ tokio-util = "0.7"
 rdkafka = { version = "0.37", features = ["cmake-build", "ssl-vendored", "tracing"] }
 thiserror = "2.0"
 tower = "0.5.2"
-tower-http = { version = "0.6", features = ["trace"] }
+tower-http = { version = "0.6", features = ["trace", "fs"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "time"] }
 utoipa = { version = "5", features = ["chrono", "uuid"] }

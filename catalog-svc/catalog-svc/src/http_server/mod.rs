@@ -6,6 +6,7 @@ use axum::{
 };
 use rust_demo_commons::util::server;
 use sqlx::Postgres;
+use tower_http::services::{ServeDir, ServeFile};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 use uuid::Uuid;
@@ -57,6 +58,9 @@ pub struct CatalogApp {
 
 /// Build the API router with the given shared state. Use this when you need to keep a copy of [CatalogApp].
 pub fn router_with_state(state: CatalogApp) -> Router {
+    let static_files = ServeDir::new("/app/public")
+        .not_found_service(ServeFile::new("/app/public/index.html"));
+
     let api = Router::new()
         .route(
             "/catalog/items",
@@ -74,6 +78,7 @@ pub fn router_with_state(state: CatalogApp) -> Router {
         .layer(server::http_trace_layer())
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .merge(api)
+        .fallback_service(static_files)
 }
 
 #[utoipa::path(

@@ -56,6 +56,27 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
     # so copy the final binary out before the mount is released.
     && cp target/release/catalog-svc /app/catalog-svc-bin
 
+
+###############################################################################
+# Frontend builder: compile Vite app
+###############################################################################
+FROM node:22-bookworm-slim AS frontend-builder
+WORKDIR /app
+
+# Copy only manifest files first to maximize npm cache hits.
+COPY frontend/package.json frontend/package-lock.json ./frontend/
+COPY catalog-svc/catalog-client-ts/package.json catalog-svc/catalog-client-ts/package-lock.json ./catalog-svc/catalog-client-ts/
+
+RUN --mount=type=cache,target=/root/.npm,sharing=locked \
+    npm ci --prefix frontend
+
+# Copy frontend and local file-dependency sources, then build.
+COPY frontend ./frontend
+COPY catalog-svc/catalog-client-ts ./catalog-svc/catalog-client-ts
+
+RUN --mount=type=cache,target=/root/.npm,sharing=locked \
+    npm run --prefix frontend build
+
 ###############################################################################
 # Stage 4 — runtime: minimal distroless image (~20 MB vs ~800 MB builder)
 ###############################################################################
@@ -71,6 +92,7 @@ FROM gcr.io/distroless/cc-debian12 AS runtime
 USER nonroot:nonroot
 
 COPY --from=builder --chown=nonroot:nonroot /app/catalog-svc-bin /usr/local/bin/catalog-svc
+COPY --from=frontend-builder --chown=nonroot:nonroot /app/frontend/dist /app/public
 
 # Expose whatever port your service listens on
 EXPOSE 8080

@@ -11,7 +11,7 @@ export default function CatalogItemApiExample() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    listCatalogItems({ query: { limit: 50, offset: 0 } })
+    listCatalogItems({ query: { maxResults: 50 } })
       .then(({ data, error }) => {
         if (error || !data) {
           setError('Failed to load catalog items');
