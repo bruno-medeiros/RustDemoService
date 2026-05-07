@@ -2,9 +2,9 @@
 # Requires BuildKit (DOCKER_BUILDKIT=1 or Docker >= 23 which enables it by default).
 # The 1.7 frontend unlocks --mount=type=cache and inline cache exports.
 
-###############################################################################
-# Stage 1 — install cargo-chef (shared base for planner + builder)
-###############################################################################
+#=============== Rust build
+
+# Install cargo-chef
 FROM rust:1.90-bookworm AS chef
 
 # cargo-chef records a "recipe" of your dependency tree so we can cache
@@ -12,31 +12,22 @@ FROM rust:1.90-bookworm AS chef
 RUN cargo install cargo-chef --locked
 WORKDIR /app
 
-###############################################################################
-# Stage 2 — planner: capture the dependency recipe from the workspace
-###############################################################################
+# Outputs recipe.json — a reproducible snapshot of Cargo.lock + dependency graph
 FROM chef AS planner
 COPY . .
-# Outputs recipe.json — a reproducible snapshot of Cargo.lock + dependency graph
 RUN cargo chef prepare --recipe-path recipe.json
 
-###############################################################################
-# Stage 3 — builder: compile deps (cached), then compile your code
-###############################################################################
+# Builder
 FROM chef AS builder
 
-# ── System dependencies ──────────────────────────────────────────────────────
-# protobuf-compiler  → protoc binary consumed by prost-build in build.rs
-# cmake + libssl-dev → required by rdkafka's "cmake-build" feature for static
-#                      linking of librdkafka (no runtime .so dependency)
-# pkg-config         → used by several -sys crates to locate C libraries
+# System dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
         protobuf-compiler \
         cmake libssl-dev \
         pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-# ── Pre-build dependencies (the key CI cache layer) ─────────────────────────
+# Pre-build dependencies (the key CI cache layer)
 COPY --from=planner /app/recipe.json recipe.json
 
 # --mount=type=cache keeps the Cargo registry and incremental artifacts
@@ -46,7 +37,7 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
     --mount=type=cache,target=/app/target,sharing=locked \
     cargo chef cook --release --recipe-path recipe.json
 
-# ── Build application source ─────────────────────────────────────────────────
+# Build application source
 COPY . .
 
 RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
@@ -57,9 +48,7 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
     && cp target/release/catalog-svc /app/catalog-svc-bin
 
 
-###############################################################################
-# Frontend builder: compile Vite app
-###############################################################################
+#=============== Frontend builder:
 FROM node:22-bookworm-slim AS frontend-builder
 WORKDIR /app
 
@@ -77,9 +66,8 @@ COPY catalog-svc/catalog-client-ts ./catalog-svc/catalog-client-ts
 RUN --mount=type=cache,target=/root/.npm,sharing=locked \
     npm run --prefix frontend build
 
-###############################################################################
-# Stage 4 — runtime: minimal distroless image (~20 MB vs ~800 MB builder)
-###############################################################################
+#=============== runtime (minimal distroless image)
+
 # gcr.io/distroless/cc ships glibc + libgcc but nothing else (no shell, no
 # package manager). It is a good match for Rust binaries that statically link
 # their Rust std but still need glibc (the default on Linux).
