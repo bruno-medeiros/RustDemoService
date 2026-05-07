@@ -15,7 +15,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+          cache-dependency-path: package-lock.json
       - name: Setup just
         uses: taiki-e/install-action@just
       - name: Install non-Cargo deps
@@ -38,12 +45,6 @@ jobs:
         env:
           DATABASE_URL: "postgres://postgres:mypassword@127.0.0.1:5432/postgres"
         run: cargo test
-      - name: Setup Node
-        uses: actions/setup-node@v5
-        with:
-          node-version-file: ".nvmrc"
-          cache: "npm"
-          cache-dependency-path: package-lock.json
       - name: Build frontend
         run: just build-frontend
 
