@@ -5,7 +5,7 @@
 #=============== Rust build
 
 # Install cargo-chef
-FROM rust:1.90-bookworm AS chef
+FROM rust:1.91-bookworm AS chef
 
 # cargo-chef records a "recipe" of your dependency tree so we can cache
 # a fully-compiled dependency layer independently of your source code.
@@ -14,7 +14,7 @@ WORKDIR /app
 
 # Outputs recipe.json — a reproducible snapshot of Cargo.lock + dependency graph
 FROM chef AS planner
-COPY . .
+COPY --parents Cargo.toml Cargo.lock ./**/Cargo.toml ./
 RUN cargo chef prepare --recipe-path recipe.json
 
 # Builder
@@ -79,11 +79,16 @@ FROM gcr.io/distroless/cc-debian12 AS runtime
 # Principle of least privilege — distroless ships a `nonroot` user (uid 65532)
 USER nonroot:nonroot
 
+WORKDIR /app
+
 COPY --from=builder --chown=nonroot:nonroot /app/catalog-svc-bin /usr/local/bin/catalog-svc
 COPY --from=frontend-builder --chown=nonroot:nonroot /app/frontend/dist /app/public
 
-# Expose whatever port your service listens on
-EXPOSE 8080
+# Baseline config. Override per-deployment via APP__* env vars, e.g.:
+#   APP__SERVER__HOST=0.0.0.0
+#   APP__POSTGRES__HOST=...
+#   APP__POSTGRES__PASSWORD=...
+COPY --chown=nonroot:nonroot catalog-svc/catalog-svc/config.toml /app/config.toml
 
 ENTRYPOINT ["/usr/local/bin/catalog-svc"]
 
