@@ -19,8 +19,12 @@ export default function CatalogItemApiExample() {
           setItems(data.items);
         }
       })
-      .catch(() => setError('Failed to connect to server'))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        setError('Failed to connect to server');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   return (
