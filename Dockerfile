@@ -96,6 +96,7 @@ COPY --from=frontend-builder --chown=nonroot:nonroot /app/frontend/dist /app/pub
 #   APP__POSTGRES__HOST=...
 #   APP__POSTGRES__PASSWORD=...
 COPY --chown=nonroot:nonroot catalog-svc/catalog-svc/config.toml /app/config.toml
+ENV APP__SERVER__HOST=0.0.0.0
 
 ENTRYPOINT ["/usr/local/bin/catalog-svc"]
 
