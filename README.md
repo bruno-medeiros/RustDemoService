@@ -51,7 +51,7 @@ to `0.0.0.0:3030` by default and serves the built frontend from `/app/public`.
 
 1. Build the image (BuildKit is required for the cache mounts):
    ```bash
-   DOCKER_BUILDKIT=1 docker build -t catalog-svc:local .
+    docker build -t catalog-svc:local .
    ```
 
 2. Start the dependencies the service needs (Postgres on `:5432`, Kafka on `:9092`):
