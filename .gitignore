@@ -6,3 +6,6 @@ target/
 
 # Gradle
 .gradle/
+
+# Node / npm workspaces
+node_modules/

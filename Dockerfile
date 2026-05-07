@@ -54,22 +54,24 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
 
 
 #=============== Frontend builder:
-FROM node:22-bookworm-slim AS frontend-builder
+FROM node:22.12-bookworm-slim AS frontend-builder
 WORKDIR /app
 
-# Copy only manifest files first to maximize npm cache hits.
-COPY frontend/package.json frontend/package-lock.json ./frontend/
-COPY catalog-svc/catalog-client-ts/package.json catalog-svc/catalog-client-ts/package-lock.json ./catalog-svc/catalog-client-ts/
+# Copy only manifests first to maximize npm cache hits.
+COPY package.json package-lock.json ./
+COPY frontend/package.json ./frontend/
+COPY catalog-svc/catalog-client-ts/package.json ./catalog-svc/catalog-client-ts/
 
 RUN --mount=type=cache,target=/root/.npm,sharing=locked \
-    npm ci --prefix frontend
+    npm ci
 
-# Copy frontend and local file-dependency sources, then build.
+# Sources for the workspace packages and the OpenAPI spec used by codegen.
 COPY frontend ./frontend
 COPY catalog-svc/catalog-client-ts ./catalog-svc/catalog-client-ts
+COPY catalog-svc/openapi.json ./catalog-svc/openapi.json
 
 RUN --mount=type=cache,target=/root/.npm,sharing=locked \
-    npm run --prefix frontend build
+    npm run build
 
 #=============== runtime (minimal distroless image)
 

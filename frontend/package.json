@@ -1,5 +1,5 @@
 {
-  "name": "frontend3",
+  "name": "@repo/frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@repo/catalog-client": "file:../catalog-svc/catalog-client-ts",
+    "@repo/catalog-client": "*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

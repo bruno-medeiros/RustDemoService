@@ -1,0 +1,23 @@
+{
+  "name": "rust-demo-service",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Workspace root for the TypeScript packages.",
+  "workspaces": [
+    "frontend",
+    "catalog-svc/catalog-client-ts"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "packageManager": "npm@10.9.0",
+  "scripts": {
+    "generate:client": "npm run -w @repo/catalog-client generate",
+    "build:frontend": "npm run -w @repo/frontend build",
+    "build": "npm run generate:client && npm run build:frontend",
+    "lint": "npm run -w @repo/frontend lint"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3"
+  }
+}

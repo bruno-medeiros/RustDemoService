@@ -14,15 +14,15 @@ generate-openapi:
 
 # Generate TypeScript client from OpenAPI spec (hey-api)
 generate-ts-client:
-    npm --prefix catalog-svc/catalog-client-ts run generate
+    npm run generate:client
 
 # Build generated artifacts
 code-gen: generate-smithy generate-openapi generate-ts-client
 
 # Build frontend (Vite/React)
 build-frontend:
-    cd frontend && npm ci && npm run build
-    cd frontend && npm run lint
+    npm ci && npm run build
+    npm run lint
 
 start-docker-deps:
     docker compose -f docker-compose.yml up -d
