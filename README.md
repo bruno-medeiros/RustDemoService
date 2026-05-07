@@ -20,7 +20,7 @@ Learning project for Rust ecosystem and various related technologies:
   * Formatting `cargo +nightly fmt` 
 * OpenAPI spec (from Rust server code): `just generate-openapi`
 * Frontent / Typescript:
-  * Initial setup: `nvm install 20 && nvm use 20`
+  * Initial setup: `nvm install && nvm use && npm ci`
   * TypeScript client (from OpenAPI spec): `just generate-ts-client`
   * `just build-frontend`
 

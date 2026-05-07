@@ -23,6 +23,8 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "npm"
           cache-dependency-path: package-lock.json
+      - name: Install Node dependencies
+        run: npm ci
       - name: Setup just
         uses: taiki-e/install-action@just
       - name: Install non-Cargo deps

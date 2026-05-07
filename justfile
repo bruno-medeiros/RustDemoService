@@ -12,6 +12,7 @@ generate-smithy:
 generate-openapi:
     ./catalog-svc/generate-openapi.sh
 
+# TS workspaces: install from repo root first (`npm ci`), then run these.
 # Generate TypeScript client from OpenAPI spec (hey-api)
 generate-ts-client:
     npm run generate:client
@@ -21,7 +22,7 @@ code-gen: generate-smithy generate-openapi generate-ts-client
 
 # Build frontend (Vite/React)
 build-frontend:
-    npm ci && npm run build
+    npm run build
     npm run lint
 
 start-docker-deps:
