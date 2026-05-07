@@ -20,6 +20,14 @@ jobs:
         uses: taiki-e/install-action@just
       - name: Install non-Cargo deps
         run: just pre-requisites
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+          cache-dependency-path: package-lock.json
+      - name: Install Node deps
+        run: npm ci
       - name: Generate OpenAPI code (needs Rust first)
         run: just code-gen
       - name: Verify OpenAPI spec is up to date
@@ -38,12 +46,6 @@ jobs:
         env:
           DATABASE_URL: "postgres://postgres:mypassword@127.0.0.1:5432/postgres"
         run: cargo test
-      - name: Setup Node
-        uses: actions/setup-node@v5
-        with:
-          node-version-file: ".nvmrc"
-          cache: "npm"
-          cache-dependency-path: package-lock.json
       - name: Build frontend
         run: just build-frontend
 
