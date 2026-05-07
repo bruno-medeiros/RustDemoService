@@ -4,7 +4,7 @@
 
 #=============== Rust build
 
-# Install cargo-chef
+# ---- Install cargo-chef
 FROM rust:1.91-bookworm AS chef
 
 # cargo-chef records a "recipe" of your dependency tree so we can cache
@@ -12,12 +12,17 @@ FROM rust:1.91-bookworm AS chef
 RUN cargo install cargo-chef --locked
 WORKDIR /app
 
-# Outputs recipe.json — a reproducible snapshot of Cargo.lock + dependency graph
+# ---- Planner / recipe
 FROM chef AS planner
-COPY --parents Cargo.toml Cargo.lock ./**/Cargo.toml ./
+
+COPY . .
+# TODO: use --parents syntax
+# COPY --parents Cargo.toml Cargo.lock ./**/Cargo.toml ./
+
+# Outputs recipe.json — a reproducible snapshot of Cargo.lock + dependency graph
 RUN cargo chef prepare --recipe-path recipe.json
 
-# Builder
+# ---- Rust Builder
 FROM chef AS builder
 
 # System dependencies
