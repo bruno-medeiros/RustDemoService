@@ -4,6 +4,7 @@ use std::time::Duration;
 use config::{Config, Environment, File};
 use serde::Deserialize;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
+use tracing::info;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct HttpServerSettings {
@@ -24,6 +25,7 @@ impl AppConfig {
     /// Env: `APP__` prefix (e.g. `APP__POSTGRES__HOST`).
     pub fn load() -> Result<Self, config::ConfigError> {
         let config_path = env::var("CONFIG_FILE").unwrap_or_else(|_| "config.toml".to_string());
+        info!("AppConfig: config path: {}", config_path);
         let builder = Config::builder()
             .add_source(File::with_name(&config_path).required(false))
             .add_source(Environment::with_prefix("APP").separator("__"));
