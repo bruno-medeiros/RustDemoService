@@ -22,3 +22,16 @@ mod equality {
         assert!(foo.map(String::as_str) == Some("foo"));
     }
 }
+
+pub mod warnings {
+
+    async fn foo() {
+
+    }
+
+    pub async fn bar() {
+        #[expect(clippy::let_underscore_future)]
+        let _ = foo();
+    }
+
+}
