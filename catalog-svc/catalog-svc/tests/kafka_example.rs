@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use rdkafka::config::RDKafkaLogLevel;
 use rdkafka::consumer::{
     BaseConsumer, CommitMode, Consumer, ConsumerContext, Rebalance, StreamConsumer,
@@ -130,14 +130,23 @@ async fn consume_and_print(brokers: &str, group_id: &str, topics: &[&str]) {
                         ""
                     }
                 };
-                info!("key: '{:?}', payload: '{}', topic: {}, partition: {}, offset: {}, timestamp: {:?}",
-                      bm.key(), payload, bm.topic(), bm.partition(), bm.offset(), bm.timestamp());
+                info!(
+                    "key: '{:?}', payload: '{}', topic: {}, partition: {}, offset: {}, timestamp: {:?}",
+                    bm.key(),
+                    payload,
+                    bm.topic(),
+                    bm.partition(),
+                    bm.offset(),
+                    bm.timestamp()
+                );
                 if let Some(headers) = bm.headers() {
                     for header in headers.iter() {
                         info!("  Header {:#?}: {:?}", header.key, header.value);
                     }
                 }
-                consumer.commit_message(&bm, CommitMode::Async).expect("Commit succeeds");
+                consumer
+                    .commit_message(&bm, CommitMode::Async)
+                    .expect("Commit succeeds");
                 msg_count += 1;
             }
         };

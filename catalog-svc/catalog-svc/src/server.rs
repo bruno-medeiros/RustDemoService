@@ -4,8 +4,8 @@ use std::net::SocketAddr;
 
 use tokio::net::TcpListener;
 
+use crate::app_config::{AppConfig, create_pg_pool};
 use crate::catalog::service::CatalogService;
-use crate::app_config::{create_pg_pool, AppConfig};
 use crate::http_server;
 use crate::http_server::CatalogApp;
 

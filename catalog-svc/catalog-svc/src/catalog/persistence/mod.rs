@@ -2,12 +2,12 @@
 
 use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
 use rust_decimal::Decimal;
-use crate::common::pagination::{PaginatedSearchResponse, Pagination};
 use sqlx::{Executor, FromRow, Postgres};
 use thiserror::Error;
 use uuid::Uuid;
 
 use crate::catalog::api::{CatalogItem, Category};
+use crate::common::pagination::{PaginatedSearchResponse, Pagination};
 
 /// Row type for mapping SELECT results from `catalog_items` into [CatalogItem].
 #[derive(FromRow)]

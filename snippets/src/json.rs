@@ -63,7 +63,7 @@ mod tests {
 
     #[test]
     #[ignore] // Uncomment to view assert error message
-    fn compare_json_string()  {
+    fn compare_json_string() {
         let v1: Value = serde_json::from_str(DATA).unwrap();
         let v2: Value = serde_json::from_str(DATA2).unwrap();
         assert_eq!(v1.to_string(), v2.to_string());

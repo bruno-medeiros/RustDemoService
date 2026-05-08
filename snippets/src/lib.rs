@@ -25,13 +25,10 @@ mod equality {
 
 pub mod warnings {
 
-    async fn foo() {
-
-    }
+    async fn foo() {}
 
     pub async fn bar() {
         #[expect(clippy::let_underscore_future)]
         let _ = foo();
     }
-
 }

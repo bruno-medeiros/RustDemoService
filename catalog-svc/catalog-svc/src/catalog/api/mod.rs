@@ -3,12 +3,13 @@ use std::error::Error as StdError;
 use async_trait::async_trait;
 use chrono::{DateTime, NaiveDate, Utc};
 use rust_decimal::Decimal;
-use thiserror::Error;
-use crate::common::pagination::{PaginatedSearchResponse, Pagination};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
+use thiserror::Error;
 use utoipa::ToSchema;
 use uuid::Uuid;
+
+use crate::common::pagination::{PaginatedSearchResponse, Pagination};
 
 type BoxError = Box<dyn StdError + Send + Sync>;
 
@@ -25,10 +26,8 @@ pub enum CatalogServiceError {
 /// HTTP-exposed catalog operations implemented by [crate::catalog::service::CatalogService].
 #[async_trait]
 pub trait CatalogServiceApi: Send + Sync {
-    async fn create(
-        &self,
-        body: CreateCatalogItemBody,
-    ) -> Result<CatalogItem, CatalogServiceError>;
+    async fn create(&self, body: CreateCatalogItemBody)
+    -> Result<CatalogItem, CatalogServiceError>;
 
     async fn get(&self, item_id: Uuid) -> Result<Option<CatalogItem>, CatalogServiceError>;
 

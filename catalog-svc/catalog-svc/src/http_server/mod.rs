@@ -1,8 +1,8 @@
 use axum::{
+    Json, Router,
     extract::{Path, Query, State},
     http::StatusCode,
     routing::{get, post},
-    Json, Router,
 };
 use rust_demo_commons::util::server;
 use sqlx::Postgres;
@@ -11,13 +11,13 @@ use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 use uuid::Uuid;
 
+use crate::catalog::api::CatalogServiceError;
 use crate::catalog::api::{
     CatalogItem, CreateCatalogItemBody, ListCatalogItemsRequest, ListCatalogItemsResponse,
     UpdateCatalogItemBody,
 };
-use crate::common::pagination::Pagination;
-use crate::catalog::api::CatalogServiceError;
 use crate::catalog::service::CatalogService;
+use crate::common::pagination::Pagination;
 
 impl From<CatalogServiceError> for StatusCode {
     fn from(err: CatalogServiceError) -> StatusCode {
@@ -58,8 +58,8 @@ pub struct CatalogApp {
 
 /// Build the API router with the given shared state. Use this when you need to keep a copy of [CatalogApp].
 pub fn router_with_state(state: CatalogApp) -> Router {
-    let static_files = ServeDir::new("/app/public")
-        .not_found_service(ServeFile::new("/app/public/index.html"));
+    let static_files =
+        ServeDir::new("/app/public").not_found_service(ServeFile::new("/app/public/index.html"));
 
     let api = Router::new()
         .route(

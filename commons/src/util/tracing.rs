@@ -1,6 +1,6 @@
 //! Tracing subscriber setup using a registry.
 
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
+use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
 /// Initializes a global tracing subscriber using a registry with:
 /// - **EnvFilter** from `RUST_LOG`, defaulting to `info` when unset or invalid

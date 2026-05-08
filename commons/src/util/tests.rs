@@ -1,12 +1,12 @@
 use std::sync::Once;
 
-use time::macros::format_description;
 use time::UtcOffset;
+use time::macros::format_description;
+use tracing_subscriber::EnvFilter;
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::fmt::time::OffsetTime;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
-use tracing_subscriber::EnvFilter;
 
 static INIT: Once = Once::new();
 

@@ -99,11 +99,7 @@ impl CatalogService {
         item.price = body.price;
         item.modified_at = Utc::now();
         let updated = CatalogItemRepository::update(&self.pg_pool, &item).await?;
-        if updated {
-            Ok(Some(item))
-        } else {
-            Ok(None)
-        }
+        if updated { Ok(Some(item)) } else { Ok(None) }
     }
 
     /// Delete a catalog item. Returns true if it existed and was removed.

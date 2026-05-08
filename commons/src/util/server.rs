@@ -4,8 +4,8 @@ use std::time::Duration;
 
 use tokio_util::sync::CancellationToken;
 use tower_http::{
-    trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer},
     LatencyUnit,
+    trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer},
 };
 use tracing::Level;
 
