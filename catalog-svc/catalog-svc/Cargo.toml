@@ -35,3 +35,6 @@ catalog-svc = { workspace = true, features = ["test-utils"] }
 [[bin]]
 name = "dump-openapi"
 path = "src/bin/dump_openapi.rs"
+
+[lints]
+workspace = true

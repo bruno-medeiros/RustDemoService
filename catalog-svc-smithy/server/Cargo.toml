@@ -17,3 +17,6 @@ catalog_api = { path = "./build/smithyprojections/server/source/rust-server-code
 
 # application service implementation
 catalog-svc.workspace = true
+
+[lints]
+workspace = true
