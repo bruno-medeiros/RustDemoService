@@ -12,7 +12,7 @@ fn valid_urls() {
     Uri::try_from("s:foo.com/path/").unwrap_err();
 
     Url::parse("/foo.com/path").unwrap_err();
-    let uri = Uri::try_from("/foo.com/path").unwrap(); // Why is this valid.unwrap()
+    let uri = Uri::try_from("/foo.com/path").unwrap(); // Why is this valid?
     assert_eq!(uri.scheme(), None);
 
     Url::parse("foo.com/path").unwrap_err();
@@ -20,7 +20,7 @@ fn valid_urls() {
 }
 #[test]
 fn compare_urls() {
-    let url_str = "https://github.com/rust-lang//rust/issues.unwrap()labels=E-easy&state=open";
+    let url_str = "https://github.com/rust-lang//rust/issues?labels=E-easy&state=open";
 
     let url = Url::parse(url_str).unwrap();
     assert_eq!(url.path(), "/rust-lang//rust/issues");
