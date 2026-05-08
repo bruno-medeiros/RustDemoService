@@ -191,12 +191,12 @@ impl CatalogItemRepository {
             LIMIT $1 OFFSET $2
             "#,
         )
-        .bind(limit + 1)
-        .bind(offset)
+        .bind((limit + 1) as i64)
+        .bind(offset as i64)
         .fetch_all(executor)
         .await?;
 
-        let has_more = rows.len() as i64 > limit;
+        let has_more = rows.len() as u32 > limit;
         let take = if has_more { limit as usize } else { rows.len() };
         let items: Result<Vec<_>, _> = rows
             .into_iter()

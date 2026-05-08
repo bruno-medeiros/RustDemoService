@@ -6,15 +6,6 @@ mod errors;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use catalog_api::server::request::extension::Extension;
-use catalog_api::model as smithy;
-use catalog_api::{error, input, output};
-use catalog_svc::catalog::api::{
-    CreateCatalogItemBody, ListCatalogItemsRequest, ListCatalogItemsResponse, UpdateCatalogItemBody,
-};
-use catalog_svc::http_server::CatalogApp;
-use rust_decimal::Decimal;
-
 use crate::server::dtos::{
     map_category_from_smithy, service_item_to_create_output, service_item_to_get_output,
     service_item_to_update_output, service_items_to_smithy_items, uuid_from_smithy,
@@ -23,6 +14,15 @@ use crate::server::errors::{
     catalog_error_to_create, catalog_error_to_delete, catalog_error_to_get, catalog_error_to_list,
     catalog_error_to_update, dto_internal, not_found_error_404, price_parse_to_validation,
 };
+use catalog_api::error::{InternalServerError};
+use catalog_api::model as smithy;
+use catalog_api::server::request::extension::Extension;
+use catalog_api::{error, input, output};
+use catalog_svc::catalog::api::{
+    CreateCatalogItemBody, ListCatalogItemsRequest, ListCatalogItemsResponse, UpdateCatalogItemBody,
+};
+use catalog_svc::http_server::CatalogApp;
+use rust_decimal::Decimal;
 
 type AppState = CatalogApp;
 
@@ -115,8 +115,8 @@ pub async fn list_catalog_items(
     Extension(state): Extension<Arc<AppState>>,
 ) -> Result<output::ListCatalogItemsOutput, error::ListCatalogItemsError> {
     let req = ListCatalogItemsRequest {
-        limit: input.limit,
-        offset: input.offset,
+        limit: input.limit.map(convert_i64_to_u32).transpose()?,
+        offset: input.offset.map(convert_i64_to_u32).transpose()?,
     };
 
     let ListCatalogItemsResponse {
@@ -136,10 +136,16 @@ pub async fn list_catalog_items(
     Ok(output::ListCatalogItemsOutput {
         items: smithy_items,
         has_more,
-        total_count: total_count.and_then(|c| i64::try_from(c).ok()),
+        total_count: total_count.map(|c| c.into()),
         pagination: smithy::Pagination {
-            limit: pagination.limit,
-            offset: pagination.offset,
+            limit: pagination.limit.into(),
+            offset: pagination.offset.into(),
         },
+    })
+}
+
+fn convert_i64_to_u32(v: i64) -> Result<u32, InternalServerError> {
+    u32::try_from(v).map_err(|err| InternalServerError {
+        message: Some(format!("Expect u32 value, but: {err}")),
     })
 }

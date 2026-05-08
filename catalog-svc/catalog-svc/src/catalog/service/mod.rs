@@ -68,7 +68,7 @@ impl CatalogService {
         req: ListCatalogItemsRequest,
     ) -> Result<ListCatalogItemsResponse, CatalogServiceError> {
         let limit = req.limit.unwrap_or(100).clamp(1, 100);
-        let offset = req.offset.unwrap_or(0).max(0);
+        let offset = req.offset.unwrap_or(0);
 
         let search =
             CatalogItemRepository::search(&self.pg_pool, Pagination { limit, offset }).await?;
@@ -113,7 +113,7 @@ impl CatalogService {
 
     /// Multiply every stored item's price by `multiplier` (e.g. `1.1` for a 10% increase).
     /// Runs inside a single SQL transaction.
-    pub async fn increase_prices(&self, multiplier: Decimal) -> Result<u64, CatalogServiceError> {
+    pub async fn increase_prices(&self, multiplier: Decimal) -> Result<u32, CatalogServiceError> {
         if multiplier <= Decimal::ZERO {
             return Err(CatalogServiceError::ValidationError(Box::new(
                 std::io::Error::new(
@@ -126,9 +126,9 @@ impl CatalogService {
         let mult = multiplier;
         let mut tx = self.pg_pool.begin().await.map_err(RepositoryError::from)?;
 
-        let mut offset: i64 = 0;
-        let mut updated: u64 = 0;
-        const PAGE: i64 = 100;
+        let mut offset: u32 = 0;
+        let mut updated: u32 = 0;
+        const PAGE: u32 = 100;
 
         loop {
             let page = CatalogItemRepository::search(

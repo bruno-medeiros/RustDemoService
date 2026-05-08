@@ -111,9 +111,9 @@ pub struct UpdateCatalogItemBody {
 #[serde(rename_all = "camelCase")]
 pub struct ListCatalogItemsRequest {
     /// Maximum number of items to return (page size). Defaults to 100; clamped server-side.
-    pub limit: Option<i64>,
+    pub limit: Option<u32>,
     /// Zero-based offset into the result set. Defaults to 0.
-    pub offset: Option<i64>,
+    pub offset: Option<u32>,
 }
 
 /// Response for the list catalog items endpoint.
@@ -123,7 +123,7 @@ pub struct ListCatalogItemsResponse {
     pub items: Vec<CatalogItem>,
     pub has_more: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub total_count: Option<u64>,
+    pub total_count: Option<u32>,
     pub pagination: Pagination,
 }
 

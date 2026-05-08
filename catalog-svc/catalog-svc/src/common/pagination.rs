@@ -7,8 +7,8 @@ use utoipa::ToSchema;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct Pagination {
-    pub limit: i64,
-    pub offset: i64,
+    pub limit: u32,
+    pub offset: u32,
 }
 
 /// Paginated search result: item list plus continuation and optional total.
@@ -18,7 +18,7 @@ pub struct PaginatedSearchResponse<T> {
     pub items: Vec<T>,
     pub has_more: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub total_count: Option<u64>,
+    pub total_count: Option<u32>,
 }
 
 impl<T> PaginatedSearchResponse<T> {
@@ -30,7 +30,7 @@ impl<T> PaginatedSearchResponse<T> {
         }
     }
 
-    pub fn with_total_count(mut self, total: u64) -> Self {
+    pub fn with_total_count(mut self, total: u32) -> Self {
         self.total_count = Some(total);
         self
     }
