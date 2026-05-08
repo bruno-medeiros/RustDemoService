@@ -46,6 +46,7 @@ fn test_recursive_mut() {
     //x.push(3);
 }
 #[allow(clippy::needless_lifetimes)]
+#[allow(clippy::unwrap_used)]
 fn get_default2<'m, K: Eq + Hash + Clone, V: Default>(
     map: &'m mut HashMap<K, V>,
     key: K,

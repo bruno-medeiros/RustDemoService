@@ -39,16 +39,15 @@ mod tests {
 
     #[test]
     #[ignore] // Uncomment to view assert error message
-    fn compare_json_value_neq() -> Result<()> {
-        let v1: Value = serde_json::from_str(DATA)?;
-        let v2: Value = serde_json::from_str(DATA2)?;
+    fn compare_json_value_neq() {
+        let v1: Value = serde_json::from_str(DATA).unwrap();
+        let v2: Value = serde_json::from_str(DATA2).unwrap();
         assert_eq!(v1, v2);
-        Ok(())
     }
 
     #[test]
-    fn compare_json_value() -> Result<()> {
-        let v1: Value = serde_json::from_str(DATA)?;
+    fn compare_json_value() {
+        let v1: Value = serde_json::from_str(DATA).unwrap();
         let v3 = r#"
         {
             "age": 43,
@@ -58,18 +57,16 @@ mod tests {
             ],
             "name": "John Doe"
         }"#;
-        let v3: Value = serde_json::from_str(v3)?;
+        let v3: Value = serde_json::from_str(v3).unwrap();
         assert_eq!(v1, v3);
-        Ok(())
     }
 
     #[test]
     #[ignore] // Uncomment to view assert error message
-    fn compare_json_string() -> Result<()> {
-        let v1: Value = serde_json::from_str(DATA)?;
-        let v2: Value = serde_json::from_str(DATA2)?;
+    fn compare_json_string()  {
+        let v1: Value = serde_json::from_str(DATA).unwrap();
+        let v2: Value = serde_json::from_str(DATA2).unwrap();
         assert_eq!(v1.to_string(), v2.to_string());
-        Ok(())
     }
 
     fn deserialize<'de, T: Deserialize<'de>>(content: &'de str) -> Result<T> {

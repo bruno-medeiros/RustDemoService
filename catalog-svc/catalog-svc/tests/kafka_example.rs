@@ -137,7 +137,7 @@ async fn consume_and_print(brokers: &str, group_id: &str, topics: &[&str]) {
                         info!("  Header {:#?}: {:?}", header.key, header.value);
                     }
                 }
-                consumer.commit_message(&bm, CommitMode::Async).unwrap();
+                consumer.commit_message(&bm, CommitMode::Async).expect("Commit succeeds");
                 msg_count += 1;
             }
         };

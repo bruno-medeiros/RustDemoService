@@ -20,7 +20,7 @@ pub fn setup_tracing() {
     let format = tracing_subscriber::fmt::layer();
     let filter = EnvFilter::try_from_default_env()
         .or_else(|_| EnvFilter::try_new("info"))
-        .unwrap();
+        .expect("EnvFilter should be well-formatted");
     tracing_subscriber::registry()
         .with(format)
         .with(filter)

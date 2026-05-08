@@ -22,7 +22,7 @@ pub fn init_logging() {
         let filter = EnvFilter::builder()
             .with_default_directive(LevelFilter::INFO.into())
             .from_env()
-            .unwrap();
+            .expect("Env should be well-formatted");
 
         tracing_subscriber::registry()
             .with(format)

@@ -68,3 +68,30 @@ debug_assert_with_mut_call = "warn"
 iter_not_returning_iterator = "warn"
 expl_impl_clone_on_copy = "warn"
 dbg_macro = "warn"
+
+# Alternative:
+#[workspace.lints.clippy]
+#pedantic = { level = "warn", priority = -1 }
+#restriction = { level = "warn", priority = -2 }
+#missing_docs_in_private_items = "allow"
+#mod_module_files = "allow"
+#doc_markdown = "allow"
+#single_call_fn = "allow"
+#pub_with_shorthand = "allow"
+#std_instead_of_core = "allow"
+## API correctness:
+#exhaustive_structs = "allow"
+#exhaustive_enums = "allow"
+#arbitrary_source_item_ordering = "allow"
+#implicit_return = "allow"
+#
+#absolute_paths = "allow"
+#question_mark_used = "allow"
+#allow_attributes_without_reason = "allow"
+#missing_inline_in_public_items = "allow"
+#shadow_reuse = "allow"
+#impl_trait_in_params = "allow"
+#clippy::needless_raw_strings = "allow"
+##Pedantic
+#missing_errors_doc = "allow"
+#cast_possible_truncation = "allow"
