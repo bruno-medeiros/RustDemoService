@@ -32,24 +32,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-# Pre-build dependencies (the key CI cache layer)
+# Pre-build dependencies (the key CI cache layer).
+#
+# IMPORTANT: do NOT mount /app/target as a cache here. cargo-chef relies on the
+# compiled deps being baked into THIS image layer so it can be reused via
+# layer caching (e.g. GHA `type=gha`). A cache mount would shadow target/ and
+# discard the artifacts when the RUN finishes, defeating the whole point.
+#
+# The registry mount is local-only (BuildKit doesn't export cache mounts to
+# GHA), so it speeds up local rebuilds but is a no-op in CI.
 COPY --from=planner /app/recipe.json recipe.json
 
-# --mount=type=cache keeps the Cargo registry and incremental artifacts
-# across builds on the same runner without baking them into the image layer.
-# This is the single biggest CI speedup: deps only recompile when Cargo.lock changes.
 RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
-    --mount=type=cache,target=/app/target,sharing=locked \
     cargo chef cook --release --recipe-path recipe.json
 
-# Build application source
+# Build application source. Same reasoning: keep target/ in the layer so the
+# cooked deps from the previous step are visible to cargo.
 COPY . .
 
 RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
-    --mount=type=cache,target=/app/target,sharing=locked \
     cargo build --release -p catalog-svc \
-    # The target/ dir lives in a cache mount and won't survive to the next stage,
-    # so copy the final binary out before the mount is released.
     && cp target/release/catalog-svc /app/catalog-svc-bin
 
 
