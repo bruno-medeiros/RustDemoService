@@ -52,7 +52,8 @@ COPY . .
 
 RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
     cargo build --release -p catalog-svc \
-    && cp target/release/catalog-svc /app/catalog-svc-bin
+    && cp target/release/catalog-svc /app/catalog-svc-bin \
+    && target/release/dump-openapi > /app/openapi.json
 
 
 #=============== Frontend builder:
@@ -70,7 +71,7 @@ RUN --mount=type=cache,target=/root/.npm,sharing=locked \
 # Sources for the workspace packages and the OpenAPI spec used by codegen.
 COPY frontend ./frontend
 COPY catalog-svc/catalog-client-ts ./catalog-svc/catalog-client-ts
-COPY catalog-svc/openapi.json ./catalog-svc/openapi.json
+COPY --from=builder /app/openapi.json ./catalog-svc/openapi.json
 
 RUN --mount=type=cache,target=/root/.npm,sharing=locked \
     npm run build
