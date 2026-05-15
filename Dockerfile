@@ -15,9 +15,17 @@ WORKDIR /app
 # ---- Planner / recipe
 FROM chef AS planner
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        default-jdk-headless \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY . .
 # TODO: use --parents syntax
 # COPY --parents Cargo.toml Cargo.lock ./**/Cargo.toml ./
+
+# Cargo must be able to load every workspace manifest during planning. The
+# Smithy Rust crate is generated, so create it before cargo-chef reads metadata.
+RUN ./gradlew build
 
 # Outputs recipe.json — a reproducible snapshot of Cargo.lock + dependency graph
 RUN cargo chef prepare --recipe-path recipe.json
@@ -42,6 +50,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # The registry mount is local-only (BuildKit doesn't export cache mounts to
 # GHA), so it speeds up local rebuilds but is a no-op in CI.
 COPY --from=planner /app/recipe.json recipe.json
+COPY --from=planner /app/catalog-svc-smithy/server/build /app/catalog-svc-smithy/server/build
+COPY --from=planner /app/catalog-svc-smithy/client/build /app/catalog-svc-smithy/client/build
 
 RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
     cargo chef cook --release --recipe-path recipe.json
@@ -52,7 +62,8 @@ COPY . .
 
 RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
     cargo build --release -p catalog-svc \
-    && cp target/release/catalog-svc /app/catalog-svc-bin
+    && cp target/release/catalog-svc /app/catalog-svc-bin \
+    && cargo run --release -p catalog-svc --bin dump-openapi > /app/catalog-svc/openapi.json
 
 
 #=============== Frontend builder:
@@ -70,7 +81,7 @@ RUN --mount=type=cache,target=/root/.npm,sharing=locked \
 # Sources for the workspace packages and the OpenAPI spec used by codegen.
 COPY frontend ./frontend
 COPY catalog-svc/catalog-client-ts ./catalog-svc/catalog-client-ts
-COPY catalog-svc/openapi.json ./catalog-svc/openapi.json
+COPY --from=builder /app/catalog-svc/openapi.json ./catalog-svc/openapi.json
 
 RUN --mount=type=cache,target=/root/.npm,sharing=locked \
     npm run build
