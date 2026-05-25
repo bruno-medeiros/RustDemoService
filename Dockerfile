@@ -9,7 +9,10 @@ FROM rust:1.91-bookworm AS chef
 
 # cargo-chef records a "recipe" of your dependency tree so we can cache
 # a fully-compiled dependency layer independently of your source code.
-RUN cargo install cargo-chef --locked
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        default-jdk-headless \
+    && rm -rf /var/lib/apt/lists/* \
+    && cargo install cargo-chef --locked
 WORKDIR /app
 
 # ---- Planner / recipe
@@ -18,6 +21,9 @@ FROM chef AS planner
 COPY . .
 # TODO: use --parents syntax
 # COPY --parents Cargo.toml Cargo.lock ./**/Cargo.toml ./
+
+# Generate Smithy Rust crates before Cargo reads the workspace manifests.
+RUN ./gradlew build
 
 # Outputs recipe.json — a reproducible snapshot of Cargo.lock + dependency graph
 RUN cargo chef prepare --recipe-path recipe.json
@@ -49,6 +55,8 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
 # Build application source. Same reasoning: keep target/ in the layer so the
 # cooked deps from the previous step are visible to cargo.
 COPY . .
+COPY --from=planner /app/catalog-svc-smithy/client/build ./catalog-svc-smithy/client/build
+COPY --from=planner /app/catalog-svc-smithy/server/build ./catalog-svc-smithy/server/build
 
 RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
     cargo build --release -p catalog-svc --bins \
