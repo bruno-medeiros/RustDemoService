@@ -26,7 +26,7 @@ build-frontend:
     npm run lint
 
 start-docker-deps:
-    docker compose -f docker-compose.yml up -d
+    docker compose -f docker-compose.yml up --wait -d
 
 # Recreate catalog-svc DB from scratch
 database-reset:
