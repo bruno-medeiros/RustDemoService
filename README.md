@@ -29,7 +29,7 @@ Learning project for Rust ecosystem and various related technologies:
 ### Running the app
 1. Start dependencies (Postgres, Kafka):
    ```bash
-   docker compose -f docker-compose.yml up --wait -d
+   just start-docker-deps
    ```
 2. Run the catalog service (listens on `http://localhost:3030`):
    ```bash
@@ -56,7 +56,7 @@ to `0.0.0.0:3030` by default and serves the built frontend from `/app/public`.
 
 2. Start the dependencies the service needs (Postgres on `:5432`, Kafka on `:9092`):
    ```bash
-   docker compose -f docker-compose.yml up --wait -d
+   just start-docker-deps
    ```
 
 3. Run the image. The bundled `config.toml` points postgres at `localhost`,
