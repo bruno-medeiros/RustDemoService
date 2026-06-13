@@ -42,7 +42,16 @@ jobs:
       - name: Lint
         run: cargo clippy --all-targets -- --deny warnings
       - name: Setup containers for tests
-        run: docker compose -f docker-compose.yml up -d
+        run: |
+          docker compose -f docker-compose.yml up -d
+          for attempt in {1..60}; do
+            if docker compose -f docker-compose.yml exec -T db pg_isready -U postgres -d postgres; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker compose -f docker-compose.yml logs db
+          exit 1
       - name: Run tests
         env:
           DATABASE_URL: "postgres://postgres:mypassword@127.0.0.1:5432/postgres"
