@@ -27,7 +27,6 @@ build-frontend:
 
 start-docker-deps:
     docker compose -f docker-compose.yml up -d
-    for attempt in `seq 1 60`; do docker compose -f docker-compose.yml exec -T db pg_isready -U postgres -d postgres && exit 0; sleep 1; done; docker compose -f docker-compose.yml logs db; exit 1
 
 # Recreate catalog-svc DB from scratch
 database-reset:
